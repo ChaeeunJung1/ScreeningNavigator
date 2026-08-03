@@ -7,8 +7,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lumos App",
-  description: "Built with create-lumos-app",
+  title: "ScreeningNavigator",
+  description:
+    "Find your path to breast cancer screening based on your insurance status.",
 };
 
 export default function RootLayout({
