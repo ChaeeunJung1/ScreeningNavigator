@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import type { InsuranceStatus } from "~/lib/screening-data";
-import { US_STATES } from "~/lib/screening-data";
+import { SUPPORTED_STATES } from "~/lib/screening-data";
 import { cn } from "~/lib/utils";
 
 const INSURANCE_OPTIONS: { value: InsuranceStatus; label: string }[] = [
@@ -69,7 +69,7 @@ export function QuestionnaireForm() {
           className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
         >
           <option value="">Select your state</option>
-          {US_STATES.map((s) => (
+          {SUPPORTED_STATES.map((s) => (
             <option key={s.code} value={s.code}>
               {s.name}
             </option>

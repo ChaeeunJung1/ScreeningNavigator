@@ -63,6 +63,9 @@ export interface StateProgram {
   medicaidExpanded: boolean;
 }
 
+/** States with a verified, matched screening program — the only ones selectable in the questionnaire. */
+export const SUPPORTED_STATE_CODES = ["CA", "TX", "FL", "PA"] as const;
+
 /** Source-verified screening program data for the states currently covered. */
 export const STATE_PROGRAMS: Record<string, StateProgram> = {
   CA: {
@@ -99,6 +102,13 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
   },
 };
+
+/** The 4 supported states, in dropdown order, for the questionnaire. */
+export const SUPPORTED_STATES = SUPPORTED_STATE_CODES.map((code) => {
+  const match = US_STATES.find((s) => s.code === code);
+  if (!match) throw new Error(`Missing US_STATES entry for ${code}`);
+  return match;
+});
 
 export interface AssistanceOrg {
   name: string;
