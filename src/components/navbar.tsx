@@ -1,16 +1,50 @@
 "use client";
 
+import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button } from "~/components/ui/button";
+import { createClient } from "~/lib/supabase/client";
 import { cn } from "~/lib/utils";
-
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/notes", label: "Notes" },
-];
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+
+  const isAdmin = user?.app_metadata?.is_admin === true;
+  const links = [
+    { href: "/", label: "Home" },
+    { href: "/navigator", label: "Navigator" },
+    { href: "/notes", label: "Notes" },
+    ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    const { data: subscription } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      },
+    );
+
+    return () => {
+      subscription.subscription.unsubscribe();
+    };
+  }, []);
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <nav className="border-b border-border bg-background">
@@ -18,7 +52,7 @@ export function Navbar() {
         <Link href="/" className="font-semibold tracking-tight">
           ScreeningNavigator
         </Link>
-        <div className="flex gap-4">
+        <div className="flex flex-1 gap-4">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -34,6 +68,15 @@ export function Navbar() {
             </Link>
           ))}
         </div>
+        {user ? (
+          <Button variant="outline" size="sm" onClick={handleSignOut}>
+            Sign out
+          </Button>
+        ) : (
+          <Button size="sm" asChild>
+            <Link href="/login">Sign up / Sign in</Link>
+          </Button>
+        )}
       </div>
     </nav>
   );
