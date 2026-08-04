@@ -1,9 +1,10 @@
-import { QuestionnaireForm } from "~/components/questionnaire-form";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
 
 export default function Home() {
   return (
-    <main className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center gap-10 p-8 py-16">
-      <div className="flex max-w-2xl flex-col items-center gap-4 text-center">
+    <main className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center gap-6 p-8 py-16 text-center">
+      <div className="flex max-w-2xl flex-col items-center gap-4">
         <h1 className="text-4xl font-bold tracking-tight">
           Find your path to breast cancer screening
         </h1>
@@ -15,12 +16,9 @@ export default function Home() {
         </p>
       </div>
 
-      <QuestionnaireForm />
-
-      <p className="max-w-md text-center text-sm text-muted-foreground">
-        This is not a diagnostic tool and does not replace a doctor. Persistent
-        symptoms should always be evaluated by a medical professional.
-      </p>
+      <Button size="lg" asChild>
+        <Link href="/navigator">Get started</Link>
+      </Button>
     </main>
   );
 }

@@ -16,6 +16,7 @@ import {
   TYPICAL_PROGRAM_FPL_MAX,
   US_STATES,
 } from "~/lib/screening-data";
+import { createClient } from "~/lib/supabase/server";
 
 const MEDICAID_EXPANSION_THRESHOLD_FPL = 138;
 
@@ -24,13 +25,22 @@ interface ResultsPageProps {
 }
 
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?next=/navigator");
+  }
+
   const params = await searchParams;
   const stateCode = typeof params.state === "string" ? params.state : "";
   const insurance =
     typeof params.insurance === "string" ? params.insurance : "";
 
   if (!stateCode || !insurance) {
-    redirect("/");
+    redirect("/navigator");
   }
 
   const age = Number(params.age);
@@ -61,6 +71,22 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     fplPercent !== null && fplPercent > TYPICAL_PROGRAM_FPL_MAX;
 
   const isInsured = insurance === "insured";
+
+  const { error: upsertError } = await supabase
+    .from("screening_results")
+    .upsert(
+      {
+        user_id: user.id,
+        state_code: stateCode,
+        insurance_status: insurance,
+        program_name: isInsured ? null : (program?.programName ?? null),
+      },
+      { onConflict: "user_id" },
+    );
+
+  if (upsertError) {
+    console.error("Failed to save screening result", upsertError);
+  }
 
   return (
     <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-2xl flex-col gap-6 p-8 py-12">
@@ -93,7 +119,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       )}
 
       <Link
-        href="/"
+        href="/navigator"
         className="text-center text-sm text-muted-foreground underline hover:text-foreground"
       >
         Start over
