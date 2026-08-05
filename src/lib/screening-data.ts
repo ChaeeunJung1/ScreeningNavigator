@@ -62,6 +62,10 @@ export interface StateProgram {
   ifDiagnosed?: string;
   medicaidExpanded: boolean;
   website?: string;
+  /** Program's income ceiling as % of FPL. Omitted when unconfirmed or when there's no fixed number — see incomeCeilingNote. */
+  incomeCeilingFplPercent?: number;
+  /** Free-text caveat for ceiling edge cases: unconfirmed, no income test, no fixed ceiling, a floor that also applies, etc. */
+  incomeCeilingNote?: string;
 }
 
 /** Source-verified screening program data for the states currently covered. */
@@ -73,6 +77,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote: "Available 24/7, multiple languages",
     ifDiagnosed: "BCCTP, 1-800-824-0088",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 200,
     website: "dhcs.ca.gov/services/every-woman-counts",
   },
   TX: {
@@ -82,6 +87,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "No single statewide number — find and call your local provider directly. Lost your Medicaid card? Call 2-1-1 (press 2 after choosing a language), or 1-877-541-7905 if 2-1-1 doesn't connect.",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 200,
     website:
       "healthytexaswomen.org/healthcare-programs/breast-cervical-cancer-services",
   },
@@ -93,6 +99,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "Run per-county, no single statewide number. General program line: 850-245-4144. Example: Pasco County, 727-619-0369.",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 200,
     website:
       "floridahealth.gov/individual-family-health/womens-health/breast-and-cervical-cancer-early-detection-program",
   },
@@ -103,6 +110,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "AccessMatters, 1-800-848-3367 (Bucks, Chester, Delaware, Montgomery, Philadelphia counties). Adagio Health, 1-800-215-7494 (everywhere else in Pennsylvania).",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "pa.gov/agencies/health/diseases-conditions/cancer/pa-bccedp",
   },
   NY: {
@@ -110,6 +119,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Cancer Services Program (CSP)",
     contact: "1-866-442-2262 (1-866-442-CANCER)",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "No fixed income ceiling — eligibility is based on insurance-gap status, not income.",
     website: "health.ny.gov/diseases/cancer/services",
   },
   IL: {
@@ -118,6 +129,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-888-522-1282",
     contactNote: "TTY 1-800-547-0466",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "No income test — your income doesn't affect eligibility.",
     website:
       "dph.illinois.gov/topics-services/life-stages-populations/womens-health-services/ibccp.html",
   },
@@ -127,6 +140,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-844-430-2227 (1-844-430-BCCP)",
     contactNote: "Routes by region via phone menu.",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "odh.ohio.gov/know-our-programs/breast-cervical-cancer-project",
   },
   GA: {
@@ -136,6 +150,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "State office line, not a direct patient line — contact your county health department, or call 1-866-PUB-HLTH (24/7) as a fallback.",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 200,
     website: "dph.georgia.gov/BCCP",
   },
   NC: {
@@ -143,6 +158,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "NC Breast and Cervical Cancer Control Program (NC BCCCP)",
     contact: "1-800-662-7030",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "bcccp.ncdhhs.gov",
   },
   MI: {
@@ -152,6 +168,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-844-446-8727",
     contactNote: "TTY 711",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "michigan.gov/mdhhs/keep-mi-healthy/chronicdiseases/cancer/bc3np",
   },
   WA: {
@@ -160,6 +178,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-888-438-2247",
     contactNote: 'Routes to one of 6 regional "Prime Contractors."',
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website:
       "doh.wa.gov/you-and-your-family/illness-and-disease-z/cancer/breast-cervical-and-colon-health-program",
   },
@@ -169,6 +189,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-888-257-8502 or 2-1-1",
     contactNote: "ACS-partnered hotline, M–F 8am–6pm AZ time.",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "azdhs.gov/prevention/chronic-disease/cancer-prevention-control",
   },
   MA: {
@@ -177,6 +198,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "Massachusetts Breast and Cervical Cancer Program (MBCCP) — formerly Women's Health Network",
     contact: "1-877-414-4447",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "mass.gov/womens-health-network-whn",
   },
   TN: {
@@ -186,6 +209,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "Central office; also available at every county health department.",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 250,
     website: "tn.gov/health/tnbcsp.html",
   },
   IN: {
@@ -195,6 +219,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "State admin office, not a patient line — 3 regional coordinators actually enroll patients.",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 200,
     website: "in.gov/health/cdpc/cancer/early-detection",
   },
   MO: {
@@ -202,6 +227,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Show Me Healthy Women (SMHW)",
     contact: "1-866-726-9926",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website:
       "health.mo.gov/conditions-and-diseases/chronic-diseases/show-me-healthy-women",
   },
@@ -212,6 +238,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "State diagnosis/treatment line, not a screening enrollment line — screening is per-county (e.g. Howard County, 410-313-4255).",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "health.maryland.gov/phpa/cancer/pages/bccp_home.aspx",
   },
   WI: {
@@ -221,6 +248,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "Fallback only — most counties have their own faster direct coordinator line.",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 250,
     website: "dhs.wisconsin.gov/wwwp/index.htm",
   },
   CO: {
@@ -230,6 +258,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "No statewide number exists — find and call your local clinic directly.",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "cdphe.colorado.gov/wwc",
   },
   MN: {
@@ -237,6 +266,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Sage Screening Program",
     contact: "1-888-643-2584 (1-888-6HEALTH)",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "health.state.mn.us/diseases/cancer/sage",
   },
   VA: {
@@ -244,6 +275,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Every Woman's Life (EWL)",
     contact: "1-866-395-4968",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "vdh.virginia.gov/every-womans-life",
   },
   NJ: {
@@ -251,6 +284,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "NJ Cancer Education and Early Detection (NJCEED)",
     contact: "1-800-328-3838",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "nj.gov/health/cancer/njceed",
   },
   SC: {
@@ -258,6 +292,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Best Chance Network (BCN)",
     contact: "1-800-450-4611",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 250,
     website: "dph.sc.gov/bcn",
   },
   KY: {
@@ -265,6 +300,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Kentucky Women's Cancer Screening Program (KWCSP)",
     contact: "1-844-249-0708",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "chfs.ky.gov/agencies/dph/dwh/Pages/cancerscreening.aspx",
   },
   LA: {
@@ -272,6 +308,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Louisiana Breast & Cervical Health Program (LBCHP)",
     contact: "1-888-599-1073",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "lbchp.org",
   },
   AL: {
@@ -280,6 +317,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "Alabama Breast and Cervical Cancer Early Detection Program (ABCCEDP)",
     contact: "1-877-252-3324",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 250,
     website: "alabamapublichealth.gov/bandc",
   },
   OR: {
@@ -287,6 +325,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "ScreenWise (formerly Oregon BCCP)",
     contact: "1-877-255-7070",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "oregon.gov/oha/ph/healthypeoplefamilies/women/healthscreening",
   },
   OK: {
@@ -294,6 +333,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Take Charge!",
     contact: "1-888-669-5934",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — sources conflict (185% vs. 250% FPL). Call to check eligibility.",
     website: "oklahoma.gov",
   },
   CT: {
@@ -304,6 +345,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "State office line — most patients actually contact a local provider directly.",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 200,
     website: "portal.ct.gov/dph/cedpp",
   },
   NV: {
@@ -311,6 +353,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Women's Health Connection (WHC)",
     contact: "1-877-385-2345",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "dpbh.nv.gov/programs/chronic-diseases/womens-health-connection",
   },
   MS: {
@@ -319,6 +362,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "Mississippi Breast and Cervical Cancer Early Detection Program (MS-BCCP)",
     contact: "1-800-721-7222",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 250,
     website: "msdh.ms.gov",
   },
   AR: {
@@ -326,6 +370,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "BreastCare",
     contact: "1-833-693-2942",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "arbreastcare.com",
   },
   IA: {
@@ -333,6 +379,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Care for Yourself",
     contact: "1-866-339-7909",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "hhs.iowa.gov/health-prevention/cancer/cfy",
   },
   KS: {
@@ -340,6 +388,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Early Detection Works (EDW)",
     contact: "1-877-277-1368",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 225,
     website: "kdhe.ks.gov/826/Early-Detection-Works",
   },
   WV: {
@@ -347,6 +396,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "WV Breast and Cervical Cancer Screening Program (WVBCCSP)",
     contact: "1-800-422-6237",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "dhhr.wv.gov/bccsp",
   },
   DE: {
@@ -354,6 +404,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Screening for Life",
     contact: "302-744-1040",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
+    incomeCeilingNote: "A floor of 139% FPL also applies for this program.",
     website: "dhss.delaware.gov/dph/dpc/sfl",
   },
   RI: {
@@ -361,6 +413,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Women's Cancer Screening Program",
     contact: "401-222-4324",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "health.ri.gov/breast-and-cervical-cancer-screening",
   },
   NH: {
@@ -368,6 +421,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Breast & Cervical Cancer Program (BCCP)",
     contact: "603-271-4931",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "dhhs.nh.gov",
   },
   ID: {
@@ -376,6 +430,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "Contact your local public health district",
     contactNote: "No single statewide number exists.",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 200,
     website: "healthandwelfare.idaho.gov",
   },
   NM: {
@@ -383,6 +438,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Breast and Cervical Cancer Early Detection (BCC) Program",
     contact: "1-833-525-1811",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "nmhealth.org/about/phd/pchb/bcc",
   },
   NE: {
@@ -390,6 +446,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Every Woman Matters (EWM)",
     contact: "1-800-532-2227",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "dhhs.ne.gov",
   },
   UT: {
@@ -397,6 +455,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Utah Breast & Cervical Cancer Program",
     contact: "1-800-717-1811",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "cancer.utah.gov",
   },
   MT: {
@@ -404,6 +464,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Montana Cancer Screening Program",
     contact: "1-888-803-9343",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "dphhs.mt.gov",
   },
   WY: {
@@ -411,6 +472,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Wyoming Breast and Cervical Cancer Early Detection Program",
     contact: "1-800-264-1296",
     medicaidExpanded: false,
+    incomeCeilingFplPercent: 250,
     website: "health.wyo.gov",
   },
   ND: {
@@ -418,6 +480,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Women's Way",
     contact: "1-800-280-5512",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "hhs.nd.gov",
   },
   SD: {
@@ -425,6 +489,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "All Women Count!",
     contact: "1-800-738-2301",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "doh.sd.gov",
   },
   VT: {
@@ -432,6 +497,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "You First (formerly Ladies First)",
     contact: "1-800-508-2222",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "healthvermont.gov",
   },
   ME: {
@@ -439,6 +505,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Maine Breast and Cervical Health Program",
     contact: "1-800-350-5180",
     medicaidExpanded: true,
+    incomeCeilingFplPercent: 250,
     website: "maine.gov",
   },
   HI: {
@@ -448,6 +515,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "State office line — contact the nearest island clinic directly.",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "health.hawaii.gov",
   },
   AK: {
@@ -455,6 +524,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     programName: "Ladies First",
     contact: "1-800-410-6266",
     medicaidExpanded: true,
+    incomeCeilingNote:
+      "Income ceiling not confirmed — call to check eligibility.",
     website: "health.alaska.gov",
   },
 };
@@ -562,6 +633,5 @@ export function getFplPercent(
   return Math.round((annualIncome / povertyLine) * 100);
 }
 
-/** Most state screening programs target this age and income range; outside of it, eligibility should be confirmed by phone. */
+/** Most state screening programs target this age range; outside of it, eligibility should be confirmed by phone. */
 export const TYPICAL_PROGRAM_AGE_RANGE = { min: 40, max: 64 };
-export const TYPICAL_PROGRAM_FPL_MAX = 250;
