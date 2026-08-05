@@ -15,7 +15,6 @@ import {
   MEDICAID_TREATMENT_PATHWAY_NOTE,
   STATE_PROGRAMS,
   TYPICAL_PROGRAM_AGE_RANGE,
-  TYPICAL_PROGRAM_FPL_MAX,
   US_STATES,
 } from "~/lib/screening-data";
 import { createClient } from "~/lib/supabase/server";
@@ -68,8 +67,6 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const fplPercent = hasValidIncomeInputs
     ? getFplPercent(income, householdSize)
     : null;
-  const incomeAboveTypicalRange =
-    fplPercent !== null && fplPercent > TYPICAL_PROGRAM_FPL_MAX;
 
   const isInsured = insurance === "insured";
 
@@ -111,7 +108,6 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
           stateName={stateName}
           program={program}
           ageOutsideTypicalRange={ageOutsideTypicalRange}
-          incomeAboveTypicalRange={incomeAboveTypicalRange}
           fplPercent={fplPercent}
         />
       )}
@@ -128,21 +124,40 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 
 function EligibilityCaveat({
   ageOutsideTypicalRange,
-  incomeAboveTypicalRange,
+  incomeAboveCeiling,
+  incomeCeilingFplPercent,
+  incomeCeilingNote,
 }: {
   ageOutsideTypicalRange: boolean;
-  incomeAboveTypicalRange: boolean;
+  incomeAboveCeiling: boolean;
+  incomeCeilingFplPercent: number | undefined;
+  incomeCeilingNote: string | undefined;
 }) {
-  if (!ageOutsideTypicalRange && !incomeAboveTypicalRange) return null;
+  if (!ageOutsideTypicalRange && !incomeAboveCeiling && !incomeCeilingNote) {
+    return null;
+  }
 
   return (
-    <p className="text-sm text-muted-foreground">
-      {ageOutsideTypicalRange &&
-        `This program's typical age range is ${TYPICAL_PROGRAM_AGE_RANGE.min}–${TYPICAL_PROGRAM_AGE_RANGE.max}, and you're outside it. `}
-      {incomeAboveTypicalRange &&
-        `Your income looks like it's above the typical eligibility cutoff for this program. `}
-      Call anyway — exceptions exist and eligibility rules vary by program.
-    </p>
+    <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+      {ageOutsideTypicalRange && (
+        <p className="font-bold">
+          This program's typical age range is {TYPICAL_PROGRAM_AGE_RANGE.min}–
+          {TYPICAL_PROGRAM_AGE_RANGE.max}, and you're outside it.
+        </p>
+      )}
+      {incomeAboveCeiling && (
+        <p className="font-bold">
+          Your income looks like it's above this program's income ceiling (
+          {incomeCeilingFplPercent}% FPL).
+        </p>
+      )}
+      {incomeCeilingNote && <p>{incomeCeilingNote}</p>}
+      {(ageOutsideTypicalRange || incomeAboveCeiling) && (
+        <p>
+          Call anyway — exceptions exist and eligibility rules vary by program.
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -150,15 +165,19 @@ function UninsuredOutcome({
   stateName,
   program,
   ageOutsideTypicalRange,
-  incomeAboveTypicalRange,
   fplPercent,
 }: {
   stateName: string;
   program: (typeof STATE_PROGRAMS)[string] | undefined;
   ageOutsideTypicalRange: boolean;
-  incomeAboveTypicalRange: boolean;
   fplPercent: number | null;
 }) {
+  const incomeCeilingFplPercent = program?.incomeCeilingFplPercent;
+  const incomeAboveCeiling =
+    fplPercent !== null &&
+    incomeCeilingFplPercent !== undefined &&
+    fplPercent > incomeCeilingFplPercent;
+
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -189,7 +208,9 @@ function UninsuredOutcome({
               </p>
               <EligibilityCaveat
                 ageOutsideTypicalRange={ageOutsideTypicalRange}
-                incomeAboveTypicalRange={incomeAboveTypicalRange}
+                incomeAboveCeiling={incomeAboveCeiling}
+                incomeCeilingFplPercent={incomeCeilingFplPercent}
+                incomeCeilingNote={program.incomeCeilingNote}
               />
               {program.ifDiagnosed && (
                 <p className="text-sm">
