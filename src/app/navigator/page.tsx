@@ -13,7 +13,7 @@ export default async function NavigatorPage() {
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center gap-10 p-8 py-16">
+    <div className="flex flex-col items-center gap-10 p-4 py-12">
       <div className="flex max-w-2xl flex-col items-center gap-4 text-center">
         <h1 className="text-4xl font-bold tracking-tight">
           Find your path to breast cancer screening
@@ -32,6 +32,6 @@ export default async function NavigatorPage() {
         This is not a diagnostic tool and does not replace a doctor. Persistent
         symptoms should always be evaluated by a medical professional.
       </p>
-    </main>
+    </div>
   );
 }

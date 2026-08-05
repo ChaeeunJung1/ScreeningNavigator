@@ -1,7 +1,9 @@
 "use client";
 
+import { UserPlus } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -29,6 +31,15 @@ export default function LoginPage() {
   function getNextPath() {
     return new URLSearchParams(window.location.search).get("next") ?? "/";
   }
+
+  useEffect(() => {
+    const requestedMode = new URLSearchParams(window.location.search).get(
+      "mode",
+    );
+    if (requestedMode === "sign-up") {
+      setMode("sign-up");
+    }
+  }, []);
 
   async function handleGoogleSignIn() {
     setError(null);
@@ -92,10 +103,22 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex max-w-3xl justify-center px-4 py-16">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>
+    <main className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-6 px-4 py-16">
+      <Link href="/" className="flex flex-col items-center gap-0.5 text-center">
+        <span className="text-xl font-bold tracking-tight text-primary">
+          ScreeningNavigator.com
+        </span>
+        <span className="text-sm text-muted-foreground">
+          Breast cancer screening access
+        </span>
+      </Link>
+
+      <Card className="w-full max-w-sm border-primary/20">
+        <CardHeader className="items-center text-center">
+          <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-primary/10">
+            <UserPlus className="size-6 text-primary" />
+          </div>
+          <CardTitle className="text-xl">
             {mode === "sign-in" ? "Sign in" : "Create an account"}
           </CardTitle>
           <CardDescription>

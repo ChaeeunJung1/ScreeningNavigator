@@ -15,7 +15,12 @@ const INSURANCE_OPTIONS: { value: InsuranceStatus; label: string }[] = [
   { value: "insured", label: "Fully insured" },
 ];
 
-export function QuestionnaireForm() {
+export function QuestionnaireForm({
+  embedded = false,
+}: {
+  /** When true, skips the outer card chrome so the form can sit inside another card/panel. */
+  embedded?: boolean;
+}) {
   const router = useRouter();
   const [state, setState] = useState("");
   const [insurance, setInsurance] = useState<InsuranceStatus | "">("");
@@ -58,7 +63,12 @@ export function QuestionnaireForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full max-w-md flex-col gap-5 rounded-xl border bg-card p-6 text-card-foreground shadow-sm"
+      className={cn(
+        "flex w-full flex-col gap-5",
+        embedded
+          ? "max-w-none"
+          : "max-w-md rounded-xl border bg-card p-6 text-card-foreground shadow-sm",
+      )}
     >
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="state">What state do you live in?</Label>
