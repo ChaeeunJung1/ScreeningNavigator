@@ -49,7 +49,6 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const householdSize = Number(params.householdSize);
   const income = Number(params.income);
   const hasRegularDoctor = params.hasRegularDoctor === "yes";
-  const costWorry = params.costWorry === "yes";
 
   const stateName =
     US_STATES.find((s) => s.code === stateCode)?.name ?? stateCode;
@@ -106,10 +105,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       </div>
 
       {isInsured ? (
-        <InsuredOutcome
-          hasRegularDoctor={hasRegularDoctor}
-          costWorry={costWorry}
-        />
+        <InsuredOutcome hasRegularDoctor={hasRegularDoctor} />
       ) : (
         <UninsuredOutcome
           stateName={stateName}
@@ -250,6 +246,11 @@ function UninsuredOutcome({
               <li key={org.name} className="flex flex-col">
                 <span className="font-medium">{org.name}</span>
                 <span className="text-muted-foreground">{org.contact}</span>
+                {org.eligibility && (
+                  <span className="text-muted-foreground text-xs">
+                    {org.eligibility}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
@@ -339,13 +340,7 @@ function MedicaidGuidance({
   );
 }
 
-function InsuredOutcome({
-  hasRegularDoctor,
-  costWorry,
-}: {
-  hasRegularDoctor: boolean;
-  costWorry: boolean;
-}) {
+function InsuredOutcome({ hasRegularDoctor }: { hasRegularDoctor: boolean }) {
   return (
     <div className="flex flex-col gap-4">
       {!hasRegularDoctor && (
@@ -405,26 +400,45 @@ function InsuredOutcome({
         </CardContent>
       </Card>
 
-      {costWorry && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Cost-assistance options</CardTitle>
-            <CardDescription>
-              Since you flagged cost as a concern.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="flex flex-col gap-2 text-sm">
-              {[...FINANCIAL_ASSISTANCE, ...INSURED_COST_HELP].map((org) => (
-                <li key={org.name} className="flex flex-col">
-                  <span className="font-medium">{org.name}</span>
-                  <span className="text-muted-foreground">{org.contact}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Get screened now</CardTitle>
+          <CardDescription>
+            If you're not matched to a program, or need a backup option.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="flex flex-col gap-2 text-sm">
+            {FINANCIAL_ASSISTANCE.map((org) => (
+              <li key={org.name} className="flex flex-col">
+                <span className="font-medium">{org.name}</span>
+                <span className="text-muted-foreground">{org.contact}</span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>If something is found: cost help for treatment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="flex flex-col gap-2 text-sm">
+            {INSURED_COST_HELP.map((org) => (
+              <li key={org.name} className="flex flex-col">
+                <span className="font-medium">{org.name}</span>
+                <span className="text-muted-foreground">{org.contact}</span>
+                {org.eligibility && (
+                  <span className="text-muted-foreground text-xs">
+                    {org.eligibility}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -462,6 +462,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
 export interface AssistanceOrg {
   name: string;
   contact: string;
+  /** Optional eligibility criteria, shown alongside the org when present. */
+  eligibility?: string;
 }
 
 /** Shown immediately for "get screened now," same list for every state. */
@@ -487,6 +489,19 @@ export const FINANCIAL_ASSISTANCE: AssistanceOrg[] = [
 export const COST_HELP_LATER: AssistanceOrg[] = [
   { name: "CancerCare", contact: "1-800-813-4673" },
   { name: "The Pink Fund", contact: "pinkfund.org" },
+  {
+    name: "Family Reach",
+    contact: "973-394-1411 · familyreach.org",
+    eligibility:
+      "Income ≤300% FPL for some funds, plus age/family structure: patient under 31, or 31+ with children 18 or under at home.",
+  },
+  {
+    name: "American Cancer Society Hope Lodge",
+    contact:
+      "1-800-227-2345 · cancer.org/support-programs-and-services/patient-lodging/hope-lodge.html",
+    eligibility:
+      "Must be in active treatment and living 40+ miles from the treatment center. No income limit.",
+  },
 ];
 
 /**
@@ -501,6 +516,12 @@ export const INSURED_COST_HELP: AssistanceOrg[] = [
   {
     name: "Patient Advocate Foundation (formerly PAN Foundation, merged March 2026)",
     contact: "1-866-512-3861 · copays.org",
+  },
+  {
+    name: "HealthWell Foundation",
+    contact: "1-800-675-8416 · healthwellfoundation.org",
+    eligibility:
+      "Must have insurance covering part of the treatment cost — applies even to their travel fund.",
   },
 ];
 
