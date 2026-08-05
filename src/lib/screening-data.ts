@@ -61,6 +61,7 @@ export interface StateProgram {
   contactNote?: string;
   ifDiagnosed?: string;
   medicaidExpanded: boolean;
+  website?: string;
 }
 
 /** Source-verified screening program data for the states currently covered. */
@@ -72,6 +73,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote: "Available 24/7, multiple languages",
     ifDiagnosed: "BCCTP, 1-800-824-0088",
     medicaidExpanded: true,
+    website: "dhcs.ca.gov/services/every-woman-counts",
   },
   TX: {
     state: "Texas",
@@ -80,6 +82,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "No single statewide number — find and call your local provider directly. Lost your Medicaid card? Call 2-1-1 (press 2 after choosing a language), or 1-877-541-7905 if 2-1-1 doesn't connect.",
     medicaidExpanded: false,
+    website:
+      "healthytexaswomen.org/healthcare-programs/breast-cervical-cancer-services",
   },
   FL: {
     state: "Florida",
@@ -87,8 +91,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "Mary Brogan Breast and Cervical Cancer Early Detection Program",
     contact: "Your local county health department (floridahealth.gov)",
     contactNote:
-      "Run per-county, no single statewide number. General program line: 850-245-4444. Example: Pasco County, 727-619-0369.",
+      "Run per-county, no single statewide number. General program line: 850-245-4144. Example: Pasco County, 727-619-0369.",
     medicaidExpanded: false,
+    website:
+      "floridahealth.gov/individual-family-health/womens-health/breast-and-cervical-cancer-early-detection-program",
   },
   PA: {
     state: "Pennsylvania",
@@ -97,6 +103,359 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote:
       "AccessMatters, 1-800-848-3367 (Bucks, Chester, Delaware, Montgomery, Philadelphia counties). Adagio Health, 1-800-215-7494 (everywhere else in Pennsylvania).",
     medicaidExpanded: true,
+    website: "pa.gov/agencies/health/diseases-conditions/cancer/pa-bccedp",
+  },
+  NY: {
+    state: "New York",
+    programName: "Cancer Services Program (CSP)",
+    contact: "1-866-442-2262 (1-866-442-CANCER)",
+    medicaidExpanded: true,
+    website: "health.ny.gov/diseases/cancer/services",
+  },
+  IL: {
+    state: "Illinois",
+    programName: "Illinois Breast and Cervical Cancer Program (IBCCP)",
+    contact: "1-888-522-1282",
+    contactNote: "TTY 1-800-547-0466",
+    medicaidExpanded: true,
+    website:
+      "dph.illinois.gov/topics-services/life-stages-populations/womens-health-services/ibccp.html",
+  },
+  OH: {
+    state: "Ohio",
+    programName: "Breast & Cervical Cancer Project (BCCP)",
+    contact: "1-844-430-2227 (1-844-430-BCCP)",
+    contactNote: "Routes by region via phone menu.",
+    medicaidExpanded: true,
+    website: "odh.ohio.gov/know-our-programs/breast-cervical-cancer-project",
+  },
+  GA: {
+    state: "Georgia",
+    programName: "Breast and Cervical Cancer Program (BCCP)",
+    contact: "404-657-6370",
+    contactNote:
+      "State office line, not a direct patient line — contact your county health department, or call 1-866-PUB-HLTH (24/7) as a fallback.",
+    medicaidExpanded: false,
+    website: "dph.georgia.gov/BCCP",
+  },
+  NC: {
+    state: "North Carolina",
+    programName: "NC Breast and Cervical Cancer Control Program (NC BCCCP)",
+    contact: "1-800-662-7030",
+    medicaidExpanded: true,
+    website: "bcccp.ncdhhs.gov",
+  },
+  MI: {
+    state: "Michigan",
+    programName:
+      "Breast and Cervical Cancer Control Navigation Program (BC3NP)",
+    contact: "1-844-446-8727",
+    contactNote: "TTY 711",
+    medicaidExpanded: true,
+    website: "michigan.gov/mdhhs/keep-mi-healthy/chronicdiseases/cancer/bc3np",
+  },
+  WA: {
+    state: "Washington",
+    programName: "Breast, Cervical and Colon Health Program (BCCHP)",
+    contact: "1-888-438-2247",
+    contactNote: 'Routes to one of 6 regional "Prime Contractors."',
+    medicaidExpanded: true,
+    website:
+      "doh.wa.gov/you-and-your-family/illness-and-disease-z/cancer/breast-cervical-and-colon-health-program",
+  },
+  AZ: {
+    state: "Arizona",
+    programName: "Well Woman HealthCheck Program (WWHP)",
+    contact: "1-888-257-8502 or 2-1-1",
+    contactNote: "ACS-partnered hotline, M–F 8am–6pm AZ time.",
+    medicaidExpanded: true,
+    website: "azdhs.gov/prevention/chronic-disease/cancer-prevention-control",
+  },
+  MA: {
+    state: "Massachusetts",
+    programName:
+      "Massachusetts Breast and Cervical Cancer Program (MBCCP) — formerly Women's Health Network",
+    contact: "1-877-414-4447",
+    medicaidExpanded: true,
+    website: "mass.gov/womens-health-network-whn",
+  },
+  TN: {
+    state: "Tennessee",
+    programName: "Tennessee Breast and Cervical Screening Program (TBCSP)",
+    contact: "1-877-969-6636",
+    contactNote:
+      "Central office; also available at every county health department.",
+    medicaidExpanded: false,
+    website: "tn.gov/health/tnbcsp.html",
+  },
+  IN: {
+    state: "Indiana",
+    programName: "Indiana Breast and Cervical Cancer Program (IN-BCCP)",
+    contact: "317-233-7901",
+    contactNote:
+      "State admin office, not a patient line — 3 regional coordinators actually enroll patients.",
+    medicaidExpanded: true,
+    website: "in.gov/health/cdpc/cancer/early-detection",
+  },
+  MO: {
+    state: "Missouri",
+    programName: "Show Me Healthy Women (SMHW)",
+    contact: "1-866-726-9926",
+    medicaidExpanded: true,
+    website:
+      "health.mo.gov/conditions-and-diseases/chronic-diseases/show-me-healthy-women",
+  },
+  MD: {
+    state: "Maryland",
+    programName: "Maryland Breast and Cervical Cancer Program (BCCP)",
+    contact: "1-800-477-9774",
+    contactNote:
+      "State diagnosis/treatment line, not a screening enrollment line — screening is per-county (e.g. Howard County, 410-313-4255).",
+    medicaidExpanded: true,
+    website: "health.maryland.gov/phpa/cancer/pages/bccp_home.aspx",
+  },
+  WI: {
+    state: "Wisconsin",
+    programName: "Wisconsin Well Woman Program (WWWP)",
+    contact: "1-800-722-2295",
+    contactNote:
+      "Fallback only — most counties have their own faster direct coordinator line.",
+    medicaidExpanded: false,
+    website: "dhs.wisconsin.gov/wwwp/index.htm",
+  },
+  CO: {
+    state: "Colorado",
+    programName: "Women's Wellness Connection (WWC)",
+    contact: "Clinic finder at cdphe.colorado.gov/find-womens-wellness-center",
+    contactNote:
+      "No statewide number exists — find and call your local clinic directly.",
+    medicaidExpanded: true,
+    website: "cdphe.colorado.gov/wwc",
+  },
+  MN: {
+    state: "Minnesota",
+    programName: "Sage Screening Program",
+    contact: "1-888-643-2584 (1-888-6HEALTH)",
+    medicaidExpanded: true,
+    website: "health.state.mn.us/diseases/cancer/sage",
+  },
+  VA: {
+    state: "Virginia",
+    programName: "Every Woman's Life (EWL)",
+    contact: "1-866-395-4968",
+    medicaidExpanded: true,
+    website: "vdh.virginia.gov/every-womans-life",
+  },
+  NJ: {
+    state: "New Jersey",
+    programName: "NJ Cancer Education and Early Detection (NJCEED)",
+    contact: "1-800-328-3838",
+    medicaidExpanded: true,
+    website: "nj.gov/health/cancer/njceed",
+  },
+  SC: {
+    state: "South Carolina",
+    programName: "Best Chance Network (BCN)",
+    contact: "1-800-450-4611",
+    medicaidExpanded: false,
+    website: "dph.sc.gov/bcn",
+  },
+  KY: {
+    state: "Kentucky",
+    programName: "Kentucky Women's Cancer Screening Program (KWCSP)",
+    contact: "1-844-249-0708",
+    medicaidExpanded: true,
+    website: "chfs.ky.gov/agencies/dph/dwh/Pages/cancerscreening.aspx",
+  },
+  LA: {
+    state: "Louisiana",
+    programName: "Louisiana Breast & Cervical Health Program (LBCHP)",
+    contact: "1-888-599-1073",
+    medicaidExpanded: true,
+    website: "lbchp.org",
+  },
+  AL: {
+    state: "Alabama",
+    programName:
+      "Alabama Breast and Cervical Cancer Early Detection Program (ABCCEDP)",
+    contact: "1-877-252-3324",
+    medicaidExpanded: false,
+    website: "alabamapublichealth.gov/bandc",
+  },
+  OR: {
+    state: "Oregon",
+    programName: "ScreenWise (formerly Oregon BCCP)",
+    contact: "1-877-255-7070",
+    medicaidExpanded: true,
+    website: "oregon.gov/oha/ph/healthypeoplefamilies/women/healthscreening",
+  },
+  OK: {
+    state: "Oklahoma",
+    programName: "Take Charge!",
+    contact: "1-888-669-5934",
+    medicaidExpanded: true,
+    website: "oklahoma.gov",
+  },
+  CT: {
+    state: "Connecticut",
+    programName:
+      "Connecticut Breast and Cervical Cancer Early Detection Program (CBCCEDP)",
+    contact: "860-509-7804",
+    contactNote:
+      "State office line — most patients actually contact a local provider directly.",
+    medicaidExpanded: true,
+    website: "portal.ct.gov/dph/cedpp",
+  },
+  NV: {
+    state: "Nevada",
+    programName: "Women's Health Connection (WHC)",
+    contact: "1-877-385-2345",
+    medicaidExpanded: true,
+    website: "dpbh.nv.gov/programs/chronic-diseases/womens-health-connection",
+  },
+  MS: {
+    state: "Mississippi",
+    programName:
+      "Mississippi Breast and Cervical Cancer Early Detection Program (MS-BCCP)",
+    contact: "1-800-721-7222",
+    medicaidExpanded: false,
+    website: "msdh.ms.gov",
+  },
+  AR: {
+    state: "Arkansas",
+    programName: "BreastCare",
+    contact: "1-833-693-2942",
+    medicaidExpanded: true,
+    website: "arbreastcare.com",
+  },
+  IA: {
+    state: "Iowa",
+    programName: "Care for Yourself",
+    contact: "1-866-339-7909",
+    medicaidExpanded: true,
+    website: "hhs.iowa.gov/health-prevention/cancer/cfy",
+  },
+  KS: {
+    state: "Kansas",
+    programName: "Early Detection Works (EDW)",
+    contact: "1-877-277-1368",
+    medicaidExpanded: false,
+    website: "kdhe.ks.gov/826/Early-Detection-Works",
+  },
+  WV: {
+    state: "West Virginia",
+    programName: "WV Breast and Cervical Cancer Screening Program (WVBCCSP)",
+    contact: "1-800-422-6237",
+    medicaidExpanded: true,
+    website: "dhhr.wv.gov/bccsp",
+  },
+  DE: {
+    state: "Delaware",
+    programName: "Screening for Life",
+    contact: "302-744-1040",
+    medicaidExpanded: true,
+    website: "dhss.delaware.gov/dph/dpc/sfl",
+  },
+  RI: {
+    state: "Rhode Island",
+    programName: "Women's Cancer Screening Program",
+    contact: "401-222-4324",
+    medicaidExpanded: true,
+    website: "health.ri.gov/breast-and-cervical-cancer-screening",
+  },
+  NH: {
+    state: "New Hampshire",
+    programName: "Breast & Cervical Cancer Program (BCCP)",
+    contact: "603-271-4931",
+    medicaidExpanded: true,
+    website: "dhhs.nh.gov",
+  },
+  ID: {
+    state: "Idaho",
+    programName: "Women's Health Check",
+    contact: "Contact your local public health district",
+    contactNote: "No single statewide number exists.",
+    medicaidExpanded: true,
+    website: "healthandwelfare.idaho.gov",
+  },
+  NM: {
+    state: "New Mexico",
+    programName: "Breast and Cervical Cancer Early Detection (BCC) Program",
+    contact: "1-833-525-1811",
+    medicaidExpanded: true,
+    website: "nmhealth.org/about/phd/pchb/bcc",
+  },
+  NE: {
+    state: "Nebraska",
+    programName: "Every Woman Matters (EWM)",
+    contact: "1-800-532-2227",
+    medicaidExpanded: true,
+    website: "dhhs.ne.gov",
+  },
+  UT: {
+    state: "Utah",
+    programName: "Utah Breast & Cervical Cancer Program",
+    contact: "1-800-717-1811",
+    medicaidExpanded: true,
+    website: "cancer.utah.gov",
+  },
+  MT: {
+    state: "Montana",
+    programName: "Montana Cancer Screening Program",
+    contact: "1-888-803-9343",
+    medicaidExpanded: true,
+    website: "dphhs.mt.gov",
+  },
+  WY: {
+    state: "Wyoming",
+    programName: "Wyoming Breast and Cervical Cancer Early Detection Program",
+    contact: "1-800-264-1296",
+    medicaidExpanded: false,
+    website: "health.wyo.gov",
+  },
+  ND: {
+    state: "North Dakota",
+    programName: "Women's Way",
+    contact: "1-800-280-5512",
+    medicaidExpanded: true,
+    website: "hhs.nd.gov",
+  },
+  SD: {
+    state: "South Dakota",
+    programName: "All Women Count!",
+    contact: "1-800-738-2301",
+    medicaidExpanded: true,
+    website: "doh.sd.gov",
+  },
+  VT: {
+    state: "Vermont",
+    programName: "You First (formerly Ladies First)",
+    contact: "1-800-508-2222",
+    medicaidExpanded: true,
+    website: "healthvermont.gov",
+  },
+  ME: {
+    state: "Maine",
+    programName: "Maine Breast and Cervical Health Program",
+    contact: "1-800-350-5180",
+    medicaidExpanded: true,
+    website: "maine.gov",
+  },
+  HI: {
+    state: "Hawaii",
+    programName: "Breast and Cervical Cancer Control Program",
+    contact: "808-692-7480",
+    contactNote:
+      "State office line — contact the nearest island clinic directly.",
+    medicaidExpanded: true,
+    website: "health.hawaii.gov",
+  },
+  AK: {
+    state: "Alaska",
+    programName: "Ladies First",
+    contact: "1-800-410-6266",
+    medicaidExpanded: true,
+    website: "health.alaska.gov",
   },
 };
 

@@ -175,6 +175,16 @@ function UninsuredOutcome({
               {program.contactNote && (
                 <CardDescription>{program.contactNote}</CardDescription>
               )}
+              {program.website && (
+                <a
+                  href={`https://${program.website}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm underline hover:text-foreground"
+                >
+                  {program.website}
+                </a>
+              )}
               <p className="text-sm text-muted-foreground">
                 This program pays for the screening directly — no insurance
                 needed.
