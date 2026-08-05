@@ -11,6 +11,8 @@ import {
   COST_HELP_LATER,
   FINANCIAL_ASSISTANCE,
   getFplPercent,
+  INSURED_COST_HELP,
+  MEDICAID_TREATMENT_PATHWAY_NOTE,
   STATE_PROGRAMS,
   TYPICAL_PROGRAM_AGE_RANGE,
   TYPICAL_PROGRAM_FPL_MAX,
@@ -242,7 +244,7 @@ function UninsuredOutcome({
         <CardHeader>
           <CardTitle>If something is found: cost help for treatment</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-3">
           <ul className="flex flex-col gap-2 text-sm">
             {COST_HELP_LATER.map((org) => (
               <li key={org.name} className="flex flex-col">
@@ -251,6 +253,7 @@ function UninsuredOutcome({
               </li>
             ))}
           </ul>
+          <CardDescription>{MEDICAID_TREATMENT_PATHWAY_NOTE}</CardDescription>
         </CardContent>
       </Card>
 
@@ -412,7 +415,7 @@ function InsuredOutcome({
           </CardHeader>
           <CardContent>
             <ul className="flex flex-col gap-2 text-sm">
-              {[...FINANCIAL_ASSISTANCE, ...COST_HELP_LATER].map((org) => (
+              {[...FINANCIAL_ASSISTANCE, ...INSURED_COST_HELP].map((org) => (
                 <li key={org.name} className="flex flex-col">
                   <span className="font-medium">{org.name}</span>
                   <span className="text-muted-foreground">{org.contact}</span>
