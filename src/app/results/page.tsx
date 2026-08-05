@@ -14,7 +14,6 @@ import {
   INSURED_COST_HELP,
   MEDICAID_TREATMENT_PATHWAY_NOTE,
   STATE_PROGRAMS,
-  TYPICAL_PROGRAM_AGE_RANGE,
   US_STATES,
 } from "~/lib/screening-data";
 import { createClient } from "~/lib/supabase/server";
@@ -54,10 +53,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const program = STATE_PROGRAMS[stateCode];
 
   const hasValidAge = Number.isFinite(age) && age > 0;
-  const ageOutsideTypicalRange =
-    hasValidAge &&
-    (age < TYPICAL_PROGRAM_AGE_RANGE.min ||
-      age > TYPICAL_PROGRAM_AGE_RANGE.max);
+  const validAge = hasValidAge ? age : null;
 
   const hasValidIncomeInputs =
     Number.isFinite(income) &&
@@ -107,7 +103,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         <UninsuredOutcome
           stateName={stateName}
           program={program}
-          ageOutsideTypicalRange={ageOutsideTypicalRange}
+          age={validAge}
           fplPercent={fplPercent}
         />
       )}
@@ -123,28 +119,46 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 }
 
 function EligibilityCaveat({
-  ageOutsideTypicalRange,
+  ageBelowMin,
+  ageAboveMax,
+  ageRangeMin,
+  ageRangeMax,
+  ageRangeNote,
   incomeAboveCeiling,
   incomeCeilingFplPercent,
   incomeCeilingNote,
 }: {
-  ageOutsideTypicalRange: boolean;
+  ageBelowMin: boolean;
+  ageAboveMax: boolean;
+  ageRangeMin: number | undefined;
+  ageRangeMax: number | undefined;
+  ageRangeNote: string | undefined;
   incomeAboveCeiling: boolean;
   incomeCeilingFplPercent: number | undefined;
   incomeCeilingNote: string | undefined;
 }) {
-  if (!ageOutsideTypicalRange && !incomeAboveCeiling && !incomeCeilingNote) {
+  const ageOutsideRange = ageBelowMin || ageAboveMax;
+
+  if (
+    !ageOutsideRange &&
+    !ageRangeNote &&
+    !incomeAboveCeiling &&
+    !incomeCeilingNote
+  ) {
     return null;
   }
 
+  const ageMessage =
+    ageRangeMin !== undefined && ageRangeMax !== undefined
+      ? `This program's typical age range is ${ageRangeMin}–${ageRangeMax}, and you're outside it.`
+      : ageBelowMin
+        ? `This program's minimum age is ${ageRangeMin}, and you're below it.`
+        : `This program's maximum age is ${ageRangeMax}, and you're above it.`;
+
   return (
     <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-      {ageOutsideTypicalRange && (
-        <p className="font-bold">
-          This program's typical age range is {TYPICAL_PROGRAM_AGE_RANGE.min}–
-          {TYPICAL_PROGRAM_AGE_RANGE.max}, and you're outside it.
-        </p>
-      )}
+      {ageOutsideRange && <p className="font-bold">{ageMessage}</p>}
+      {ageRangeNote && <p>{ageRangeNote}</p>}
       {incomeAboveCeiling && (
         <p className="font-bold">
           Your income looks like it's above this program's income ceiling (
@@ -152,7 +166,7 @@ function EligibilityCaveat({
         </p>
       )}
       {incomeCeilingNote && <p>{incomeCeilingNote}</p>}
-      {(ageOutsideTypicalRange || incomeAboveCeiling) && (
+      {(ageOutsideRange || incomeAboveCeiling) && (
         <p>
           Call anyway — exceptions exist and eligibility rules vary by program.
         </p>
@@ -164,14 +178,21 @@ function EligibilityCaveat({
 function UninsuredOutcome({
   stateName,
   program,
-  ageOutsideTypicalRange,
+  age,
   fplPercent,
 }: {
   stateName: string;
   program: (typeof STATE_PROGRAMS)[string] | undefined;
-  ageOutsideTypicalRange: boolean;
+  age: number | null;
   fplPercent: number | null;
 }) {
+  const ageRangeMin = program?.ageRangeMin;
+  const ageRangeMax = program?.ageRangeMax;
+  const ageBelowMin =
+    age !== null && ageRangeMin !== undefined && age < ageRangeMin;
+  const ageAboveMax =
+    age !== null && ageRangeMax !== undefined && age > ageRangeMax;
+
   const incomeCeilingFplPercent = program?.incomeCeilingFplPercent;
   const incomeAboveCeiling =
     fplPercent !== null &&
@@ -207,7 +228,11 @@ function UninsuredOutcome({
                 needed.
               </p>
               <EligibilityCaveat
-                ageOutsideTypicalRange={ageOutsideTypicalRange}
+                ageBelowMin={ageBelowMin}
+                ageAboveMax={ageAboveMax}
+                ageRangeMin={ageRangeMin}
+                ageRangeMax={ageRangeMax}
+                ageRangeNote={program.ageRangeNote}
                 incomeAboveCeiling={incomeAboveCeiling}
                 incomeCeilingFplPercent={incomeCeilingFplPercent}
                 incomeCeilingNote={program.incomeCeilingNote}
