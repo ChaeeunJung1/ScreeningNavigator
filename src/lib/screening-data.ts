@@ -66,6 +66,12 @@ export interface StateProgram {
   incomeCeilingFplPercent?: number;
   /** Free-text caveat for ceiling edge cases: unconfirmed, no income test, no fixed ceiling, a floor that also applies, etc. */
   incomeCeilingNote?: string;
+  /** Program's minimum eligible age for breast screening. Omitted where sources conflict — see ageRangeNote. */
+  ageRangeMin?: number;
+  /** Program's maximum eligible age. Omitted when not specified or sources conflict — see ageRangeNote. */
+  ageRangeMax?: number;
+  /** Free-text caveat for age edge cases: no max specified, or a confirmed conflict between sources on the minimum age. */
+  ageRangeNote?: string;
 }
 
 /** Source-verified screening program data for the states currently covered. */
@@ -78,6 +84,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ifDiagnosed: "BCCTP, 1-800-824-0088",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 200,
+    ageRangeMin: 40,
+    ageRangeNote: "No maximum age specified in state materials.",
     website: "dhcs.ca.gov/services/every-woman-counts",
   },
   TX: {
@@ -88,6 +96,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "No single statewide number — find and call your local provider directly. Lost your Medicaid card? Call 2-1-1 (press 2 after choosing a language), or 1-877-541-7905 if 2-1-1 doesn't connect.",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 200,
+    ageRangeMin: 40,
+    ageRangeNote: "No maximum age specified in state materials.",
     website:
       "healthytexaswomen.org/healthcare-programs/breast-cervical-cancer-services",
   },
@@ -100,6 +110,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "Run per-county, no single statewide number. General program line: 850-245-4144. Example: Pasco County, 727-619-0369.",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 200,
+    ageRangeMin: 50,
+    ageRangeMax: 64,
     website:
       "floridahealth.gov/individual-family-health/womens-health/breast-and-cervical-cancer-early-detection-program",
   },
@@ -112,6 +124,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "pa.gov/agencies/health/diseases-conditions/cancer/pa-bccedp",
   },
   NY: {
@@ -121,6 +135,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "No fixed income ceiling — eligibility is based on insurance-gap status, not income.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "health.ny.gov/diseases/cancer/services",
   },
   IL: {
@@ -131,6 +147,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "No income test — your income doesn't affect eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website:
       "dph.illinois.gov/topics-services/life-stages-populations/womens-health-services/ibccp.html",
   },
@@ -141,6 +159,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote: "Routes by region via phone menu.",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "odh.ohio.gov/know-our-programs/breast-cervical-cancer-project",
   },
   GA: {
@@ -151,6 +171,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "State office line, not a direct patient line — contact your county health department, or call 1-866-PUB-HLTH (24/7) as a fallback.",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 200,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "dph.georgia.gov/BCCP",
   },
   NC: {
@@ -159,6 +181,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-800-662-7030",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "bcccp.ncdhhs.gov",
   },
   MI: {
@@ -170,6 +194,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "michigan.gov/mdhhs/keep-mi-healthy/chronicdiseases/cancer/bc3np",
   },
   WA: {
@@ -180,6 +206,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website:
       "doh.wa.gov/you-and-your-family/illness-and-disease-z/cancer/breast-cervical-and-colon-health-program",
   },
@@ -190,6 +218,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote: "ACS-partnered hotline, M–F 8am–6pm AZ time.",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "azdhs.gov/prevention/chronic-disease/cancer-prevention-control",
   },
   MA: {
@@ -200,6 +230,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "mass.gov/womens-health-network-whn",
   },
   TN: {
@@ -210,6 +242,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "Central office; also available at every county health department.",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "tn.gov/health/tnbcsp.html",
   },
   IN: {
@@ -220,6 +254,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "State admin office, not a patient line — 3 regional coordinators actually enroll patients.",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 200,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "in.gov/health/cdpc/cancer/early-detection",
   },
   MO: {
@@ -228,6 +264,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-866-726-9926",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 35,
+    ageRangeMax: 64,
     website:
       "health.mo.gov/conditions-and-diseases/chronic-diseases/show-me-healthy-women",
   },
@@ -239,6 +277,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "State diagnosis/treatment line, not a screening enrollment line — screening is per-county (e.g. Howard County, 410-313-4255).",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "health.maryland.gov/phpa/cancer/pages/bccp_home.aspx",
   },
   WI: {
@@ -249,6 +289,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "Fallback only — most counties have their own faster direct coordinator line.",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "dhs.wisconsin.gov/wwwp/index.htm",
   },
   CO: {
@@ -259,6 +301,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "No statewide number exists — find and call your local clinic directly.",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "cdphe.colorado.gov/wwc",
   },
   MN: {
@@ -268,6 +312,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "health.state.mn.us/diseases/cancer/sage",
   },
   VA: {
@@ -277,6 +323,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "vdh.virginia.gov/every-womans-life",
   },
   NJ: {
@@ -285,6 +333,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-800-328-3838",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "nj.gov/health/cancer/njceed",
   },
   SC: {
@@ -293,6 +343,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-800-450-4611",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 30,
+    ageRangeMax: 64,
     website: "dph.sc.gov/bcn",
   },
   KY: {
@@ -301,6 +353,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-844-249-0708",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 21,
+    ageRangeMax: 64,
     website: "chfs.ky.gov/agencies/dph/dwh/Pages/cancerscreening.aspx",
   },
   LA: {
@@ -309,6 +363,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-888-599-1073",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "lbchp.org",
   },
   AL: {
@@ -318,6 +374,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-877-252-3324",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "alabamapublichealth.gov/bandc",
   },
   OR: {
@@ -326,6 +384,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-877-255-7070",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "oregon.gov/oha/ph/healthypeoplefamilies/women/healthscreening",
   },
   OK: {
@@ -335,6 +395,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — sources conflict (185% vs. 250% FPL). Call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "oklahoma.gov",
   },
   CT: {
@@ -346,6 +408,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "State office line — most patients actually contact a local provider directly.",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 200,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "portal.ct.gov/dph/cedpp",
   },
   NV: {
@@ -354,6 +418,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-877-385-2345",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "dpbh.nv.gov/programs/chronic-diseases/womens-health-connection",
   },
   MS: {
@@ -363,6 +429,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-800-721-7222",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 50,
+    ageRangeMax: 64,
     website: "msdh.ms.gov",
   },
   AR: {
@@ -372,6 +440,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "arbreastcare.com",
   },
   IA: {
@@ -381,6 +451,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "hhs.iowa.gov/health-prevention/cancer/cfy",
   },
   KS: {
@@ -389,6 +461,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-877-277-1368",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 225,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "kdhe.ks.gov/826/Early-Detection-Works",
   },
   WV: {
@@ -397,6 +471,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-800-422-6237",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "dhhr.wv.gov/bccsp",
   },
   DE: {
@@ -406,6 +482,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
     incomeCeilingNote: "A floor of 139% FPL also applies for this program.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "dhss.delaware.gov/dph/dpc/sfl",
   },
   RI: {
@@ -414,6 +492,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "401-222-4324",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "health.ri.gov/breast-and-cervical-cancer-screening",
   },
   NH: {
@@ -422,6 +502,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "603-271-4931",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "dhhs.nh.gov",
   },
   ID: {
@@ -431,6 +513,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contactNote: "No single statewide number exists.",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 200,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "healthandwelfare.idaho.gov",
   },
   NM: {
@@ -439,6 +523,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-833-525-1811",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "nmhealth.org/about/phd/pchb/bcc",
   },
   NE: {
@@ -448,6 +534,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "dhhs.ne.gov",
   },
   UT: {
@@ -457,6 +545,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 74,
     website: "cancer.utah.gov",
   },
   MT: {
@@ -465,6 +555,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-888-803-9343",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 50,
+    ageRangeMax: 64,
     website: "dphhs.mt.gov",
   },
   WY: {
@@ -473,6 +565,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-800-264-1296",
     medicaidExpanded: false,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "health.wyo.gov",
   },
   ND: {
@@ -482,6 +576,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "hhs.nd.gov",
   },
   SD: {
@@ -490,6 +586,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-800-738-2301",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "doh.sd.gov",
   },
   VT: {
@@ -498,6 +596,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-800-508-2222",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "healthvermont.gov",
   },
   ME: {
@@ -506,6 +606,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     contact: "1-800-350-5180",
     medicaidExpanded: true,
     incomeCeilingFplPercent: 250,
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "maine.gov",
   },
   HI: {
@@ -517,6 +619,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "health.hawaii.gov",
   },
   AK: {
@@ -526,6 +630,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     medicaidExpanded: true,
     incomeCeilingNote:
       "Income ceiling not confirmed — call to check eligibility.",
+    ageRangeMin: 40,
+    ageRangeMax: 64,
     website: "health.alaska.gov",
   },
 };
@@ -632,6 +738,3 @@ export function getFplPercent(
   const povertyLine = getFederalPovertyLine(householdSize);
   return Math.round((annualIncome / povertyLine) * 100);
 }
-
-/** Most state screening programs target this age range; outside of it, eligibility should be confirmed by phone. */
-export const TYPICAL_PROGRAM_AGE_RANGE = { min: 40, max: 64 };
