@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Navbar } from "~/components/navbar";
+import { AppShell } from "~/components/app-shell";
 import { ThemeProvider } from "./theme-provider";
 import "./globals.css";
 
@@ -21,8 +21,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          <Navbar />
-          {children}
+          <AppShell>{children}</AppShell>
         </ThemeProvider>
       </body>
     </html>

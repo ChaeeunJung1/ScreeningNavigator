@@ -1,5 +1,13 @@
+import {
+  Banknote,
+  CalendarDays,
+  MapPin,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -82,39 +90,149 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     console.error("Failed to save screening result", upsertError);
   }
 
+  const insuranceLabel =
+    insurance === "uninsured"
+      ? "Uninsured"
+      : insurance === "underinsured"
+        ? "Underinsured"
+        : "Fully insured";
+
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-2xl flex-col gap-6 p-8 py-12">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Your results</h1>
-        <p className="text-muted-foreground">
-          Based on {stateName} and{" "}
-          {insurance === "uninsured"
-            ? "being uninsured"
-            : insurance === "underinsured"
-              ? "being underinsured"
-              : "being fully insured"}
-          .
-        </p>
+    <div className="mx-auto grid max-w-6xl gap-6 p-4 py-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium text-primary uppercase tracking-wide">
+            Matched screening pathway
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight">Your results</h1>
+          <p className="text-muted-foreground">
+            Based on your answers, here is the most relevant screening and
+            coverage information for your situation.
+          </p>
+        </div>
+
+        {isInsured ? (
+          <InsuredOutcome hasRegularDoctor={hasRegularDoctor} />
+        ) : (
+          <UninsuredOutcome
+            stateName={stateName}
+            program={program}
+            age={validAge}
+            fplPercent={fplPercent}
+          />
+        )}
+
+        <Link
+          href="/navigator"
+          className="text-center text-sm text-muted-foreground underline hover:text-foreground"
+        >
+          Start over
+        </Link>
       </div>
 
-      {isInsured ? (
-        <InsuredOutcome hasRegularDoctor={hasRegularDoctor} />
-      ) : (
-        <UninsuredOutcome
-          stateName={stateName}
-          program={program}
-          age={validAge}
-          fplPercent={fplPercent}
-        />
-      )}
+      <div className="flex flex-col gap-6 lg:sticky lg:top-6 lg:h-fit">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Your situation</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 text-sm">
+            <SituationRow icon={MapPin} label="State" value={stateName} />
+            <SituationRow
+              icon={ShieldCheck}
+              label="Insurance"
+              value={insuranceLabel}
+            />
+            {validAge !== null && (
+              <SituationRow
+                icon={CalendarDays}
+                label="Age"
+                value={String(validAge)}
+              />
+            )}
+            {Number.isFinite(householdSize) && (
+              <SituationRow
+                icon={Users}
+                label="Household size"
+                value={String(householdSize)}
+              />
+            )}
+            {Number.isFinite(income) && (
+              <SituationRow
+                icon={Banknote}
+                label="Annual income"
+                value={`$${income.toLocaleString()}`}
+              />
+            )}
+          </CardContent>
+        </Card>
 
-      <Link
-        href="/navigator"
-        className="text-center text-sm text-muted-foreground underline hover:text-foreground"
-      >
-        Start over
-      </Link>
-    </main>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">What to do next</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <ol className="flex flex-col gap-2 text-sm">
+              {(isInsured
+                ? [
+                    "Call to confirm they take your insurance",
+                    "Ask for a routine screening mammogram",
+                    "Bring your insurance card and ID",
+                    "Watch your bill for correct preventive coding",
+                  ]
+                : [
+                    program
+                      ? `Contact ${program.programName}`
+                      : "Find a local clinic or navigator",
+                    "Prepare income and household details",
+                    "Ask about screening and follow-up coverage",
+                    "Use backup assistance if you don't qualify",
+                  ]
+              ).map((step, i) => (
+                <li key={step} className="flex gap-3">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                    {i + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+
+            {!isInsured && program?.website && (
+              <Button asChild>
+                <a
+                  href={`https://${program.website}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open official program
+                </a>
+              </Button>
+            )}
+            <Button variant="outline" asChild>
+              <a href="#get-screened-now">See backup options</a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function SituationRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof MapPin;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <Icon className="size-4 shrink-0 text-muted-foreground" />
+      <span className="text-muted-foreground">{label}</span>
+      <span className="ml-auto font-medium">{value}</span>
+    </div>
   );
 }
 
@@ -263,7 +381,7 @@ function UninsuredOutcome({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="get-screened-now">
         <CardHeader>
           <CardTitle>Get screened now</CardTitle>
           <CardDescription>
@@ -446,7 +564,7 @@ function InsuredOutcome({ hasRegularDoctor }: { hasRegularDoctor: boolean }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="get-screened-now">
         <CardHeader>
           <CardTitle>Get screened now</CardTitle>
           <CardDescription>
