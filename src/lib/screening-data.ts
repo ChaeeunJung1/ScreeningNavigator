@@ -478,11 +478,41 @@ export const FINANCIAL_ASSISTANCE: AssistanceOrg[] = [
   },
 ];
 
-/** Shown separately, for treatment-phase costs if something is found. */
+/**
+ * Shown for the uninsured/underinsured path, for treatment-phase costs if
+ * something is found. CancerCare and The Pink Fund have no insurance
+ * requirement (income/treatment-status based instead), so they're safe to
+ * show to women who don't have coverage.
+ */
 export const COST_HELP_LATER: AssistanceOrg[] = [
-  { name: "Patient Advocate Foundation", contact: "1-866-512-3861" },
-  { name: "PAN Foundation", contact: "panfoundation.org" },
+  { name: "CancerCare", contact: "1-800-813-4673" },
+  { name: "The Pink Fund", contact: "pinkfund.org" },
 ];
+
+/**
+ * Shown for the insured path only. Patient Advocate Foundation and PAN
+ * Foundation both require the applicant to already have insurance — wrong
+ * for the uninsured/underinsured path (see COST_HELP_LATER above), but a
+ * fit here since these users do have coverage.
+ * PAN Foundation merged into Patient Advocate Foundation in March 2026 —
+ * one entry, not two separate orgs.
+ */
+export const INSURED_COST_HELP: AssistanceOrg[] = [
+  {
+    name: "Patient Advocate Foundation (formerly PAN Foundation, merged March 2026)",
+    contact: "1-866-512-3861 · copays.org",
+  },
+];
+
+/**
+ * Most states extend Medicaid coverage for treatment to women diagnosed
+ * through their state screening program — via the federal Breast and
+ * Cervical Cancer Treatment Act — regardless of the state's regular
+ * Medicaid income cutoff or expansion status. Often overlooked, so it's
+ * surfaced as a pointer alongside the cost-assistance orgs above.
+ */
+export const MEDICAID_TREATMENT_PATHWAY_NOTE =
+  "If you're diagnosed, ask about Medicaid for treatment: most states extend Medicaid coverage for breast or cervical cancer treatment to women diagnosed through a state screening program, regardless of your state's regular Medicaid income cutoff. Your screening program (above) can tell you how to apply.";
 
 /** 2024 HHS federal poverty guidelines, contiguous US, by household size. */
 const FPL_BASE: Record<number, number> = {
