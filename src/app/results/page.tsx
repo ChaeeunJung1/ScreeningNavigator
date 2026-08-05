@@ -43,12 +43,25 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   }
 
   const params = await searchParams;
-  const stateCode = typeof params.state === "string" ? params.state : "";
-  const insurance =
-    typeof params.insurance === "string" ? params.insurance : "";
+  let stateCode = typeof params.state === "string" ? params.state : "";
+  let insurance = typeof params.insurance === "string" ? params.insurance : "";
 
   if (!stateCode || !insurance) {
-    redirect("/navigator");
+    // No questionnaire answers in the URL (e.g. navigating here straight
+    // from the sidebar) — fall back to the user's last saved result
+    // instead of always bouncing to the questionnaire.
+    const { data: savedResult } = await supabase
+      .from("screening_results")
+      .select("state_code, insurance_status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!savedResult) {
+      redirect("/navigator");
+    }
+
+    stateCode = savedResult.state_code;
+    insurance = savedResult.insurance_status;
   }
 
   const age = Number(params.age);
