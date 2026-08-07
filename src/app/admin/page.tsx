@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { createAdminClient } from "~/lib/supabase/admin";
 import { createClient } from "~/lib/supabase/server";
+import { AdminRowActions } from "./row-actions";
 
 interface Profile {
   id: string;
@@ -31,9 +33,12 @@ export default async function AdminPage() {
     redirect("/");
   }
 
+  const admin = createAdminClient();
+
   const [
     { data: profiles, error: profilesError },
     { data: results, error: resultsError },
+    { data: userList, error: usersError },
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -44,10 +49,20 @@ export default async function AdminPage() {
       .select(
         "user_id, state_code, insurance_status, program_name, updated_at",
       ),
+    // app_metadata (is_admin) lives on auth.users, which isn't queryable
+    // through the regular client — the admin API is the only way to read it.
+    admin.auth.admin.listUsers({ perPage: 1000 }),
   ]);
 
   const resultsByUserId = new Map(
     ((results ?? []) as ScreeningResult[]).map((r) => [r.user_id, r]),
+  );
+
+  const adminStatusByUserId = new Map(
+    (userList?.users ?? []).map((u) => [
+      u.id,
+      u.app_metadata?.is_admin === true,
+    ]),
   );
 
   return (
@@ -65,7 +80,7 @@ export default async function AdminPage() {
           <CardTitle>All users</CardTitle>
         </CardHeader>
         <CardContent>
-          {profilesError || resultsError ? (
+          {profilesError || resultsError || usersError ? (
             <p className="text-sm text-destructive">
               Failed to load user data.
             </p>
@@ -79,11 +94,16 @@ export default async function AdminPage() {
                     <th className="py-2 pr-4 font-medium">State</th>
                     <th className="py-2 pr-4 font-medium">Insurance</th>
                     <th className="py-2 pr-4 font-medium">Program received</th>
+                    <th className="py-2 pr-4 font-medium">Admin</th>
+                    <th className="py-2 pr-4 font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {((profiles ?? []) as Profile[]).map((profile) => {
                     const result = resultsByUserId.get(profile.id);
+                    const isAdminUser =
+                      adminStatusByUserId.get(profile.id) ?? false;
+                    const isSelf = profile.id === user.id;
                     return (
                       <tr
                         key={profile.id}
@@ -110,13 +130,28 @@ export default async function AdminPage() {
                             ? (result.program_name ?? "No program matched")
                             : "No questionnaire yet"}
                         </td>
+                        <td className="py-2 pr-4">
+                          {isAdminUser ? (
+                            <Badge>Admin</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="py-2 pr-4">
+                          <AdminRowActions
+                            userId={profile.id}
+                            email={profile.email}
+                            isAdmin={isAdminUser}
+                            isSelf={isSelf}
+                          />
+                        </td>
                       </tr>
                     );
                   })}
                   {(profiles ?? []).length === 0 && (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={7}
                         className="py-6 text-center text-muted-foreground"
                       >
                         No users yet.
