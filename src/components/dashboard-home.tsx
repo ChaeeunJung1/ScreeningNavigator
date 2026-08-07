@@ -100,9 +100,6 @@ export function DashboardHome() {
                 <Button asChild>
                   <Link href="/navigator">Start screening check</Link>
                 </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/education">Learn how it works</Link>
-                </Button>
               </div>
             </div>
           </CardContent>
