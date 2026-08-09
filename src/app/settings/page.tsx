@@ -12,5 +12,16 @@ export default async function SettingsPage() {
     redirect("/login?next=/settings");
   }
 
-  return <SettingsForm email={user.email ?? ""} />;
+  const { data: screeningResult } = await supabase
+    .from("screening_results")
+    .select("state_code, insurance_status, age, household_size, income")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  return (
+    <SettingsForm
+      email={user.email ?? ""}
+      screeningResult={screeningResult ?? null}
+    />
+  );
 }
