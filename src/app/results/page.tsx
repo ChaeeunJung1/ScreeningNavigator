@@ -46,7 +46,12 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   let stateCode = typeof params.state === "string" ? params.state : "";
   let insurance = typeof params.insurance === "string" ? params.insurance : "";
 
-  if (!stateCode || !insurance) {
+  // Only a fresh questionnaire submission carries both of these in the URL.
+  // Used below to make sure a plain "view my results" visit (e.g. from the
+  // sidebar) never overwrites previously saved answers with blanks.
+  const hasFreshAnswers = Boolean(stateCode && insurance);
+
+  if (!hasFreshAnswers) {
     // No questionnaire answers in the URL (e.g. navigating here straight
     // from the sidebar) — fall back to the user's last saved result
     // instead of always bouncing to the questionnaire.
@@ -87,23 +92,29 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 
   const isInsured = insurance === "insured";
 
-  const { error: upsertError } = await supabase
-    .from("screening_results")
-    .upsert(
-      {
-        user_id: user.id,
-        state_code: stateCode,
-        insurance_status: insurance,
-        program_name: isInsured ? null : (program?.programName ?? null),
-        age: validAge,
-        household_size: Number.isFinite(householdSize) ? householdSize : null,
-        income: Number.isFinite(income) ? income : null,
-      },
-      { onConflict: "user_id" },
-    );
+  // Only persist when this visit actually carries fresh questionnaire
+  // answers — a plain "view my results" visit (e.g. from the sidebar,
+  // with no query params) must never overwrite the previously saved
+  // age/household_size/income with blanks.
+  if (hasFreshAnswers) {
+    const { error: upsertError } = await supabase
+      .from("screening_results")
+      .upsert(
+        {
+          user_id: user.id,
+          state_code: stateCode,
+          insurance_status: insurance,
+          program_name: isInsured ? null : (program?.programName ?? null),
+          age: validAge,
+          household_size: Number.isFinite(householdSize) ? householdSize : null,
+          income: Number.isFinite(income) ? income : null,
+        },
+        { onConflict: "user_id" },
+      );
 
-  if (upsertError) {
-    console.error("Failed to save screening result", upsertError);
+    if (upsertError) {
+      console.error("Failed to save screening result", upsertError);
+    }
   }
 
   const insuranceLabel =
