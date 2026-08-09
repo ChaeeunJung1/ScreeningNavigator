@@ -54,6 +54,12 @@ export default async function AdminPage() {
     admin.auth.admin.listUsers({ perPage: 1000 }),
   ]);
 
+  if (profilesError)
+    console.error("[admin] profiles query failed:", profilesError);
+  if (resultsError)
+    console.error("[admin] screening_results query failed:", resultsError);
+  if (usersError) console.error("[admin] listUsers failed:", usersError);
+
   const resultsByUserId = new Map(
     ((results ?? []) as ScreeningResult[]).map((r) => [r.user_id, r]),
   );
@@ -81,9 +87,21 @@ export default async function AdminPage() {
         </CardHeader>
         <CardContent>
           {profilesError || resultsError || usersError ? (
-            <p className="text-sm text-destructive">
-              Failed to load user data.
-            </p>
+            <div className="text-sm text-destructive">
+              <p>Failed to load user data.</p>
+              {/* TEMPORARY debug output — remove once the underlying cause is fixed. */}
+              {profilesError && (
+                <p className="mt-1">profiles: {profilesError.message}</p>
+              )}
+              {resultsError && (
+                <p className="mt-1">
+                  screening_results: {resultsError.message}
+                </p>
+              )}
+              {usersError && (
+                <p className="mt-1">listUsers: {usersError.message}</p>
+              )}
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
