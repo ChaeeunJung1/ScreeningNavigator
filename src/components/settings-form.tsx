@@ -10,9 +10,27 @@ import { US_STATES } from "~/lib/screening-data";
 
 const LANGUAGES = ["English", "Spanish", "Vietnamese", "Chinese"] as const;
 
-export function SettingsForm({ email }: { email: string }) {
-  const [displayName, setDisplayName] = useState("");
-  const [defaultState, setDefaultState] = useState("");
+interface ScreeningResultSummary {
+  state_code: string;
+  insurance_status: string;
+  age: number | null;
+  household_size: number | null;
+  income: number | null;
+}
+
+const INSURANCE_LABELS: Record<string, string> = {
+  uninsured: "Uninsured",
+  underinsured: "Underinsured",
+  insured: "Fully insured",
+};
+
+export function SettingsForm({
+  email,
+  screeningResult,
+}: {
+  email: string;
+  screeningResult: ScreeningResultSummary | null;
+}) {
   const [language, setLanguage] =
     useState<(typeof LANGUAGES)[number]>("English");
   const [plainLanguage, setPlainLanguage] = useState(true);
@@ -24,8 +42,15 @@ export function SettingsForm({ email }: { email: string }) {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const stateName =
-    US_STATES.find((s) => s.code === defaultState)?.name ?? "Not set";
+  const stateName = screeningResult
+    ? (US_STATES.find((s) => s.code === screeningResult.state_code)?.name ??
+      screeningResult.state_code)
+    : "Not yet completed";
+
+  const insuranceLabel = screeningResult
+    ? (INSURANCE_LABELS[screeningResult.insurance_status] ??
+      screeningResult.insurance_status)
+    : "Not yet completed";
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 p-4 py-6">
@@ -48,42 +73,8 @@ export function SettingsForm({ email }: { email: string }) {
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="settings-name">Display name</Label>
-                <Input
-                  id="settings-name"
-                  value={displayName}
-                  onChange={(e) => {
-                    setDisplayName(e.target.value);
-                    setSaved(false);
-                  }}
-                  placeholder="Your name"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Used for saved progress.
-                </p>
-              </div>
-              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="settings-email">Email address</Label>
                 <Input id="settings-email" value={email} readOnly disabled />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="settings-state">Default state</Label>
-                <select
-                  id="settings-state"
-                  value={defaultState}
-                  onChange={(e) => {
-                    setDefaultState(e.target.value);
-                    setSaved(false);
-                  }}
-                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
-                >
-                  <option value="">Select your state</option>
-                  {US_STATES.map((s) => (
-                    <option key={s.code} value={s.code}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
               </div>
             </CardContent>
           </Card>
@@ -209,10 +200,38 @@ export function SettingsForm({ email }: { email: string }) {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Your current setup</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                From your last saved screening check.
+              </p>
             </CardHeader>
             <CardContent className="flex flex-col gap-2 text-sm">
+              <SetupRow label="Email" value={email} />
               <SetupRow label="State" value={stateName} />
-              <SetupRow label="Language" value={language} />
+              <SetupRow
+                label="Age"
+                value={
+                  screeningResult?.age != null
+                    ? String(screeningResult.age)
+                    : "Not yet completed"
+                }
+              />
+              <SetupRow
+                label="Household size"
+                value={
+                  screeningResult?.household_size != null
+                    ? String(screeningResult.household_size)
+                    : "Not yet completed"
+                }
+              />
+              <SetupRow
+                label="Annual income"
+                value={
+                  screeningResult?.income != null
+                    ? `$${screeningResult.income.toLocaleString()}`
+                    : "Not yet completed"
+                }
+              />
+              <SetupRow label="Insurance status" value={insuranceLabel} />
             </CardContent>
           </Card>
 

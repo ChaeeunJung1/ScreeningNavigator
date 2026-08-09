@@ -95,6 +95,9 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         state_code: stateCode,
         insurance_status: insurance,
         program_name: isInsured ? null : (program?.programName ?? null),
+        age: validAge,
+        household_size: Number.isFinite(householdSize) ? householdSize : null,
+        income: Number.isFinite(income) ? income : null,
       },
       { onConflict: "user_id" },
     );
