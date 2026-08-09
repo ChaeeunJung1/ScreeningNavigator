@@ -170,13 +170,6 @@ export function SettingsForm({
                   I agree to the{" "}
                   <a href="/rights" className="text-primary underline">
                     Terms of Use
-                  </a>{" "}
-                  and{" "}
-                  <a
-                    href="mailto:support@screeningnavigator.com"
-                    className="text-primary underline"
-                  >
-                    Privacy Policy
                   </a>
                 </span>
               </label>
