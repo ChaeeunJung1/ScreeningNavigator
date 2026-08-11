@@ -2,6 +2,7 @@
 
 import type { User } from "@supabase/supabase-js";
 import { Bookmark, Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -70,12 +71,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="size-5" />
           )}
         </Button>
-        <Link href="/" className="flex items-baseline gap-2">
-          <span className="font-bold tracking-tight">
-            ScreeningNavigator.com
-          </span>
-          <span className="hidden text-sm text-muted-foreground sm:inline">
-            Breast cancer screening access, made clearer
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo.png"
+            alt="ScreeningNavigator logo"
+            width={44}
+            height={44}
+            className="size-11"
+            priority
+          />
+          <span className="flex items-baseline gap-2">
+            <span className="font-bold tracking-tight">
+              ScreeningNavigator.com
+            </span>
+            <span className="hidden text-sm text-muted-foreground sm:inline">
+              Breast cancer screening access, made clearer
+            </span>
           </span>
         </Link>
         <div className="flex flex-1 items-center justify-end gap-4">
