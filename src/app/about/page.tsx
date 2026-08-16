@@ -55,8 +55,7 @@ export default function AboutPage() {
       </Card>
 
       <p className="text-center text-sm text-muted-foreground">
-        No login required to begin. Results are based on your answers and
-        verified public sources.
+        Results are based on your answers and verified public sources.
       </p>
     </div>
   );

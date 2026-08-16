@@ -5,10 +5,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Switch } from "~/components/ui/switch";
 import { US_STATES } from "~/lib/screening-data";
-
-const LANGUAGES = ["English", "Spanish", "Vietnamese", "Chinese"] as const;
 
 interface ScreeningResultSummary {
   state_code: string;
@@ -31,14 +28,6 @@ export function SettingsForm({
   email: string;
   screeningResult: ScreeningResultSummary | null;
 }) {
-  const [language, setLanguage] =
-    useState<(typeof LANGUAGES)[number]>("English");
-  const [plainLanguage, setPlainLanguage] = useState(true);
-  const [notifications, setNotifications] = useState({
-    onSave: true,
-    onProgramUpdate: true,
-    onRightsChange: false,
-  });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -60,8 +49,8 @@ export function SettingsForm({
         </p>
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">
-          Manage your profile, language, and saved screening-check data. You can
-          review privacy details before making changes.
+          Manage your profile and saved screening-check data. You can review
+          privacy details below.
         </p>
       </div>
 
@@ -76,77 +65,6 @@ export function SettingsForm({
                 <Label htmlFor="settings-email">Email address</Label>
                 <Input id="settings-email" value={email} readOnly disabled />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Preferences</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="settings-language">Preferred language</Label>
-                <select
-                  id="settings-language"
-                  value={language}
-                  onChange={(e) => {
-                    setLanguage(e.target.value as (typeof LANGUAGES)[number]);
-                    setSaved(false);
-                  }}
-                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
-                >
-                  {LANGUAGES.map((l) => (
-                    <option key={l} value={l}>
-                      {l}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
-                <span className="text-sm">Show guidance in plain language</span>
-                <Switch
-                  checked={plainLanguage}
-                  onCheckedChange={() => {
-                    setPlainLanguage((v) => !v);
-                    setSaved(false);
-                  }}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Notifications</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col divide-y divide-border">
-              <NotificationRow
-                label="Email when screening check is saved"
-                checked={notifications.onSave}
-                onCheckedChange={() =>
-                  setNotifications((p) => ({ ...p, onSave: !p.onSave }))
-                }
-              />
-              <NotificationRow
-                label="Email when program matches update"
-                checked={notifications.onProgramUpdate}
-                onCheckedChange={() =>
-                  setNotifications((p) => ({
-                    ...p,
-                    onProgramUpdate: !p.onProgramUpdate,
-                  }))
-                }
-              />
-              <NotificationRow
-                label="Email when rights guidance changes"
-                checked={notifications.onRightsChange}
-                onCheckedChange={() =>
-                  setNotifications((p) => ({
-                    ...p,
-                    onRightsChange: !p.onRightsChange,
-                  }))
-                }
-              />
             </CardContent>
           </Card>
 
@@ -173,12 +91,6 @@ export function SettingsForm({
                   </a>
                 </span>
               </label>
-              <div>
-                <Button variant="destructive">Delete saved progress</Button>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  You can delete saved progress at any time.
-                </p>
-              </div>
             </CardContent>
           </Card>
 
@@ -261,23 +173,6 @@ export function SettingsForm({
           </Card>
         </div>
       </div>
-    </div>
-  );
-}
-
-function NotificationRow({
-  label,
-  checked,
-  onCheckedChange,
-}: {
-  label: string;
-  checked: boolean;
-  onCheckedChange: () => void;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-      <span className="text-sm">{label}</span>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} />
     </div>
   );
 }
