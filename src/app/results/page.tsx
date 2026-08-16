@@ -224,8 +224,40 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
               ))}
             </ol>
 
-            {!isInsured && program?.website && (
+            {!isInsured && program?.providerFinderUrl && (
               <Button asChild>
+                <a
+                  href={`https://${program.providerFinderUrl}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Find a clinic near you
+                </a>
+              </Button>
+            )}
+            {!isInsured &&
+              !program?.providerFinderUrl &&
+              program?.generalHealthDeptFinderUrl && (
+                <Button variant="secondary" asChild>
+                  <a
+                    href={`https://${program.generalHealthDeptFinderUrl}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Find your local health department
+                  </a>
+                </Button>
+              )}
+            {!isInsured && program?.website && (
+              <Button
+                variant={
+                  program?.providerFinderUrl ||
+                  program?.generalHealthDeptFinderUrl
+                    ? "outline"
+                    : "default"
+                }
+                asChild
+              >
                 <a
                   href={`https://${program.website}`}
                   target="_blank"
@@ -407,6 +439,50 @@ function UninsuredOutcome({
           )}
         </CardContent>
       </Card>
+
+      {program && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Find nearest clinic</CardTitle>
+            <CardDescription>
+              {program.providerFinderUrl
+                ? "Search this program's official locator for a participating location near you."
+                : program.generalHealthDeptFinderUrl
+                  ? "This program doesn't publish its own locator. Here's your state's general local health department finder — call ahead to confirm they participate before visiting."
+                  : "This program doesn't publish an online locator — call to enroll and you'll be told where to go."}
+            </CardDescription>
+          </CardHeader>
+          {program.providerFinderUrl ? (
+            <CardContent>
+              <Button asChild>
+                <a
+                  href={`https://${program.providerFinderUrl}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Find a clinic near you
+                </a>
+              </Button>
+            </CardContent>
+          ) : program.generalHealthDeptFinderUrl ? (
+            <CardContent className="flex flex-col gap-2">
+              <Button variant="secondary" asChild>
+                <a
+                  href={`https://${program.generalHealthDeptFinderUrl}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Find your local health department
+                </a>
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                General locator, not confirmed as a {program.programName} site —
+                call first.
+              </p>
+            </CardContent>
+          ) : null}
+        </Card>
+      )}
 
       <Card id="get-screened-now">
         <CardHeader>
