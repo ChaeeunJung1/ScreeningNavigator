@@ -61,6 +61,23 @@ export interface StateProgram {
   ifDiagnosed?: string;
   medicaidExpanded: boolean;
   website?: string;
+  /**
+   * Official state-run clinic/provider locator (a real search tool — zip,
+   * address, or county — not just a general info page). Only set for states
+   * confirmed to have one; most programs route by phone instead and have no
+   * public self-service locator to link to.
+   */
+  providerFinderUrl?: string;
+  /**
+   * A real, working locator for the state's general local/county health
+   * department system — used only when the program has no locator of its
+   * own (providerFinderUrl is unset). This is NOT confirmed to be the same
+   * network the program enrolls through; it's the best verifiable proxy
+   * (often because the program's own contact info already points at
+   * county health departments). Always shown with a caveat in the UI —
+   * never conflate with providerFinderUrl.
+   */
+  generalHealthDeptFinderUrl?: string;
   /** Program's income ceiling as % of FPL. Omitted when unconfirmed or when there's no fixed number — see incomeCeilingNote. */
   incomeCeilingFplPercent?: number;
   /** Free-text caveat for ceiling edge cases: unconfirmed, no income test, no fixed ceiling, a floor that also applies, etc. */
@@ -86,6 +103,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeNote: "No maximum age specified in state materials.",
     website: "dhcs.ca.gov/services/every-woman-counts",
+    // apps.dhcs.ca.gov/PCPSearch was found via search but sits behind a bot
+    // wall that blocked verification — not confirmed working, left out.
   },
   TX: {
     state: "Texas",
@@ -99,6 +118,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeNote: "No maximum age specified in state materials.",
     website:
       "healthytexaswomen.org/healthcare-programs/breast-cervical-cancer-services",
+    // The "BCCS Provider Search" and "/find-doctor" pages were both
+    // confirmed empty (title only, no actual widget) as of this check —
+    // not a working locator despite the page name.
   },
   FL: {
     state: "Florida",
@@ -113,6 +135,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMax: 64,
     website:
       "floridahealth.gov/individual-family-health/womens-health/breast-and-cervical-cancer-early-detection-program",
+    // Program's own contact IS "your local county health department" — this
+    // is FL's real "Find a County Health Department" locator, all 67
+    // counties, confirmed live.
+    generalHealthDeptFinderUrl:
+      "www.floridahealth.gov/community-environmental-public-health/community-health/county-health-departments/county-health-department-location-finder",
   },
   PA: {
     state: "Pennsylvania",
@@ -137,6 +164,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "health.ny.gov/diseases/cancer/services",
+    // Filterable-by-county table of actual CSP contractor org names + direct
+    // phone numbers, confirmed live (county dropdown tested).
+    providerFinderUrl:
+      "www.health.ny.gov/diseases/cancer/services/community_resources",
   },
   IL: {
     state: "Illinois",
@@ -161,6 +192,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "odh.ohio.gov/know-our-programs/breast-cervical-cancer-project",
+    // BCCP itself routes through 4 Regional Enrollment Agencies, not local
+    // health departments directly — this is Ohio's real, confirmed-live
+    // "Find Local Health Departments" map, a proxy rather than a direct
+    // match.
+    generalHealthDeptFinderUrl: "odh.ohio.gov/find-local-health-departments",
   },
   GA: {
     state: "Georgia",
@@ -173,6 +209,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "dph.georgia.gov/BCCP",
+    // Program's own contact note says "contact your local county health
+    // department" — this is GA's real interactive "Map of all our
+    // locations" tool, confirmed live with real pins.
+    generalHealthDeptFinderUrl: "dph.georgia.gov/find-location",
   },
   NC: {
     state: "North Carolina",
@@ -183,6 +223,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "bcccp.ncdhhs.gov",
+    providerFinderUrl:
+      "www.dph.ncdhhs.gov/programs/chronic-disease-and-injury/cancer-prevention-and-control-branch/nc-cancer-screening-and-support-programs/find-a-provider",
   },
   MI: {
     state: "Michigan",
@@ -196,6 +238,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "michigan.gov/mdhhs/keep-mi-healthy/chronicdiseases/cancer/bc3np",
+    // BC3NP's own county map/dropdown — "Click on your county in the map
+    // --OR-- use the dropdown," confirmed live and program-specific.
+    providerFinderUrl:
+      "www.michigan.gov/mdhhs/keep-mi-healthy/chronicdiseases/cancer/bc3np/bc3np-locations",
   },
   WA: {
     state: "Washington",
@@ -209,6 +255,12 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMax: 64,
     website:
       "doh.wa.gov/you-and-your-family/illness-and-disease-z/cancer/breast-cervical-and-colon-health-program",
+    // General county-by-county Local Health Jurisdiction directory —
+    // confirmed real and complete, but WA's own BCCHP model runs through 6
+    // regional Prime Contractors, not directly these county LHJs. Weaker
+    // match than most Tier-2 states — flag if this needs re-review.
+    generalHealthDeptFinderUrl:
+      "doh.wa.gov/about-us/washingtons-public-health-system/washington-state-local-health-jurisdictions",
   },
   AZ: {
     state: "Arizona",
@@ -220,6 +272,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "azdhs.gov/prevention/chronic-disease/cancer-prevention-control",
+    // The ArcGIS Hub "dataset" page has no map actually visible without
+    // signing in and clicking through to an Explore view — confirmed empty
+    // on load, not a working public locator.
   },
   MA: {
     state: "Massachusetts",
@@ -232,6 +287,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "mass.gov/womens-health-network-whn",
+    providerFinderUrl:
+      "mass.gov/info-details/massachusetts-breast-and-cervical-cancer-program-mbccp-screening-sites",
   },
   TN: {
     state: "Tennessee",
@@ -256,6 +313,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "in.gov/health/cdpc/cancer/early-detection",
+    // IN-BCCP actually enrolls through 3 regional coordinators, not the
+    // county-level local health departments this map covers — a looser
+    // proxy, though confirmed live (county map/dropdown).
+    generalHealthDeptFinderUrl: "www.in.gov/localhealth",
   },
   MO: {
     state: "Missouri",
@@ -267,6 +328,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMax: 64,
     website:
       "health.mo.gov/conditions-and-diseases/chronic-diseases/show-me-healthy-women",
+    // health.mo.gov sits behind a bot wall that blocked verification of the
+    // provider map page — not confirmed working, left out.
   },
   MD: {
     state: "Maryland",
@@ -291,6 +354,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "dhs.wisconsin.gov/wwwp/index.htm",
+    // WWWP is explicitly county-coordinated (per its own contactNote) —
+    // this is WI's real "Local Public Health" county selector, confirmed
+    // live, a close match.
+    generalHealthDeptFinderUrl: "www.dhs.wisconsin.gov/lh-depts/index.htm",
   },
   CO: {
     state: "Colorado",
@@ -303,6 +370,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "cdphe.colorado.gov/wwc",
+    // The entire cdphe.colorado.gov domain returned a hard error on every
+    // URL tried (including the newer /wwc-wisewoman/cliniclocation/map) —
+    // not confirmed working, left out.
   },
   MN: {
     state: "Minnesota",
@@ -314,6 +384,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "health.state.mn.us/diseases/cancer/sage",
+    // health.state.mn.us's own current page still links to
+    // sage.web.health.state.mn.us for the clinic map, but that subdomain
+    // returned a hard 403 Forbidden on repeated checks — not confirmed
+    // working, left out.
   },
   VA: {
     state: "Virginia",
@@ -325,6 +399,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "vdh.virginia.gov/every-womans-life",
+    // EWL's only stale provider-network PDF (2018–2019) was excluded as
+    // too old to trust — this is VDH's current "Health Department Locator"
+    // (zip/address search + radius), confirmed live, last updated 2024.
+    generalHealthDeptFinderUrl:
+      "www.vdh.virginia.gov/health-department-locator",
   },
   NJ: {
     state: "New Jersey",
@@ -335,6 +414,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "nj.gov/health/cancer/njceed",
+    providerFinderUrl: "healthapps.nj.gov/cancer/njceed.aspx",
   },
   SC: {
     state: "South Carolina",
@@ -365,6 +445,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "lbchp.org",
+    providerFinderUrl: "lbchp.org/locations",
   },
   AL: {
     state: "Alabama",
@@ -376,6 +457,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "alabamapublichealth.gov/bandc",
+    // All ADPH county health department clinics participate in ABCCEDP —
+    // this is AL's real "Locations" map with search, confirmed live.
+    generalHealthDeptFinderUrl:
+      "www.alabamapublichealth.gov/about/locations.html",
   },
   OR: {
     state: "Oregon",
@@ -386,6 +471,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "oregon.gov/oha/ph/healthypeoplefamilies/women/healthscreening",
+    // The ScreenWise landing page has no locator; the real one is the
+    // "Become a ScreenWise Patient" sub-page, confirmed to have a live,
+    // sortable provider table with full addresses.
+    providerFinderUrl:
+      "www.oregon.gov/oha/ph/healthypeoplefamilies/women/healthscreening/pages/screenwise-patient.aspx",
   },
   OK: {
     state: "Oklahoma",
@@ -397,6 +487,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "oklahoma.gov",
+    // Take Charge! screens at county health departments among other sites —
+    // this is OK's real county health department map/dropdown, confirmed
+    // live (all 77 counties).
+    generalHealthDeptFinderUrl: "oklahoma.gov/health/locations/countymap.html",
   },
   CT: {
     state: "Connecticut",
@@ -410,6 +504,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "portal.ct.gov/dph/cedpp",
+    // CBCCEDP contracts with hospitals/health-service sites, not town
+    // health agencies directly — a looser proxy, though this is CT's real
+    // hover-map + lookup table, confirmed live and updated weekly.
+    generalHealthDeptFinderUrl: "portal.ct.gov/dph/about/ohla/find-your-lhd",
   },
   NV: {
     state: "Nevada",
@@ -431,6 +529,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 50,
     ageRangeMax: 64,
     website: "msdh.ms.gov",
+    // MS-BCCP's ~300 sites include health department clinics — this is
+    // MSDH's real county health department directory with regional office
+    // addresses, confirmed live.
+    generalHealthDeptFinderUrl: "msdh.ms.gov/page/19,938,166.html",
   },
   AR: {
     state: "Arkansas",
@@ -442,6 +544,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "arbreastcare.com",
+    providerFinderUrl:
+      "healthy.arkansas.gov/programs-services/prevention-healthy-living/breastcare-program/breastcare-providers/breastcare-providers-near-you",
   },
   IA: {
     state: "Iowa",
@@ -525,6 +629,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "nmhealth.org/about/phd/pchb/bcc",
+    // NM's own BCC program is run through the Dept. of Health's public
+    // health offices — this is NMDOH's real "Public Health Offices" list
+    // by county with full addresses/hours, confirmed live.
+    generalHealthDeptFinderUrl: "www.nmhealth.org/location/public",
   },
   NE: {
     state: "Nebraska",
@@ -536,6 +644,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "dhhs.ne.gov",
+    // The NebraskaMap "dataset" page embeds an ArcGIS Experience app
+    // (iframe present) but it rendered blank in repeated checks — not
+    // confirmed working, left out.
   },
   UT: {
     state: "Utah",
@@ -547,6 +658,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 74,
     website: "cancer.utah.gov",
+    providerFinderUrl: "cancer.utah.gov/get-screened",
   },
   MT: {
     state: "Montana",
@@ -588,6 +700,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "doh.sd.gov",
+    // getscreenedsd.org/all-women-count is only the general program page —
+    // the actual locator is a separate embedded Google My Maps link on
+    // that page, confirmed to load real provider pins.
+    providerFinderUrl:
+      "www.google.com/maps/d/u/2/viewer?mid=1oW_AzMrNUCkTPcwyz0_HJjjvsZgh1WY&femb=1&ll=44.71985644486366%2C-100.61335036997528&z=7",
   },
   VT: {
     state: "Vermont",
@@ -621,6 +738,7 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "health.hawaii.gov",
+    providerFinderUrl: "health.hawaii.gov/cancer/program-priorities/bcccp",
   },
   AK: {
     state: "Alaska",
@@ -632,6 +750,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "health.alaska.gov",
+    // Ladies First routes by phone to contracted providers — this is
+    // Alaska's real "Find Your Community Public Health Center" embedded
+    // map, confirmed live, a proxy rather than a Ladies First-specific list.
+    generalHealthDeptFinderUrl:
+      "health.alaska.gov/en/services/find-public-health-center",
   },
 };
 
