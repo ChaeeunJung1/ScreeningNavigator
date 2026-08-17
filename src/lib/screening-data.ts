@@ -169,6 +169,30 @@ export const TEST_PREP_BY_TYPE: Record<ScreeningType, TestPrepInfo> = {
 export const DOCUMENTS_FALLBACK_UNCONFIRMED =
   "This program didn't publish a document list. ID and proof of income are common for these programs, but not guaranteed — ask what to bring when you call.";
 
+/**
+ * Facts every program needs to determine eligibility, whether or not it
+ * formally requires proof — true regardless of documentsConfidence, since
+ * even the self-declared programs still ask for these on the enrollment
+ * call. Shown alongside DOCUMENTS_FALLBACK_UNCONFIRMED for the states where
+ * we don't know the specific requirements, so there's still something
+ * concrete to prepare instead of just "ask."
+ */
+export const DOCUMENTS_GENERAL_READY_FACTS = [
+  "Your age",
+  "Household size and approximate annual income",
+  "Whether you currently have any insurance, and what kind",
+  "Your county or city of residence",
+  "Roughly when you last had a mammogram or Pap test, if ever",
+];
+
+/**
+ * Generic clinic-registration advice, true independent of what this specific
+ * program requires — deliberately phrased so it's never confused with a
+ * claim that the program itself requires ID.
+ */
+export const DOCUMENTS_GENERAL_ID_NOTE =
+  "Bringing a photo ID is standard practice for any clinic visit, regardless of what this specific program asks for.";
+
 /** Source-verified screening program data for the states currently covered. */
 export const STATE_PROGRAMS: Record<string, StateProgram> = {
   CA: {
