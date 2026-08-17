@@ -5,7 +5,11 @@ import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import type { InsuranceStatus } from "~/lib/screening-data";
+import type {
+  EmployerPlanFunding,
+  InsurancePlanType,
+  InsuranceStatus,
+} from "~/lib/screening-data";
 import { US_STATES } from "~/lib/screening-data";
 import { cn } from "~/lib/utils";
 
@@ -13,6 +17,28 @@ const INSURANCE_OPTIONS: { value: InsuranceStatus; label: string }[] = [
   { value: "uninsured", label: "Uninsured" },
   { value: "underinsured", label: "Underinsured" },
   { value: "insured", label: "Fully insured" },
+];
+
+const PLAN_TYPE_OPTIONS: { value: InsurancePlanType; label: string }[] = [
+  { value: "employer", label: "Through my job (employer plan)" },
+  {
+    value: "marketplace",
+    label: "Marketplace or individual plan (healthcare.gov or bought directly)",
+  },
+  { value: "medicare_advantage", label: "Medicare Advantage" },
+  { value: "not_sure", label: "Not sure" },
+];
+
+const PLAN_FUNDING_OPTIONS: { value: EmployerPlanFunding; label: string }[] = [
+  {
+    value: "self_funded",
+    label: "Self-funded (my employer pays the claims itself)",
+  },
+  {
+    value: "fully_insured",
+    label: "Fully insured (through an insurance company)",
+  },
+  { value: "not_sure", label: "Not sure" },
 ];
 
 export function QuestionnaireForm({
@@ -31,6 +57,8 @@ export function QuestionnaireForm({
     "",
   );
   const [costWorry, setCostWorry] = useState<"yes" | "no" | "">("");
+  const [planType, setPlanType] = useState<InsurancePlanType | "">("");
+  const [planFunding, setPlanFunding] = useState<EmployerPlanFunding | "">("");
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(e: React.FormEvent) {
@@ -40,7 +68,14 @@ export function QuestionnaireForm({
       setError("Please fill in every field to see your results.");
       return;
     }
-    if (insurance === "insured" && (!hasRegularDoctor || !costWorry)) {
+    if (
+      insurance === "insured" &&
+      (!hasRegularDoctor || !costWorry || !planType)
+    ) {
+      setError("Please fill in every field to see your results.");
+      return;
+    }
+    if (insurance === "insured" && planType === "employer" && !planFunding) {
       setError("Please fill in every field to see your results.");
       return;
     }
@@ -55,6 +90,10 @@ export function QuestionnaireForm({
     if (insurance === "insured") {
       params.set("hasRegularDoctor", hasRegularDoctor);
       params.set("costWorry", costWorry);
+      params.set("planType", planType);
+      if (planType === "employer") {
+        params.set("planFunding", planFunding);
+      }
     }
 
     router.push(`/results?${params.toString()}`);
@@ -210,6 +249,77 @@ export function QuestionnaireForm({
               ))}
             </div>
           </fieldset>
+
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className="text-sm leading-none font-medium">
+              What type of health plan do you have?
+            </legend>
+            <div className="mt-2 flex flex-col gap-2">
+              {PLAN_TYPE_OPTIONS.map((option) => (
+                <label
+                  key={option.value}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm transition-colors",
+                    planType === option.value
+                      ? "border-primary bg-accent"
+                      : "hover:bg-accent/50",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="planType"
+                    value={option.value}
+                    checked={planType === option.value}
+                    onChange={() => {
+                      setPlanType(option.value);
+                      if (option.value !== "employer") {
+                        setPlanFunding("");
+                      }
+                    }}
+                    className="accent-primary"
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {planType === "employer" && (
+            <fieldset className="flex flex-col gap-1.5">
+              <legend className="text-sm leading-none font-medium">
+                Is your employer plan self-funded or fully insured?
+              </legend>
+              <p className="text-xs text-muted-foreground">
+                This changes who to contact if there's ever a billing dispute.
+                Check your insurance ID card, or ask HR for the Summary Plan
+                Description if you're not sure — larger employers commonly
+                self-fund.
+              </p>
+              <div className="mt-1 flex flex-col gap-2">
+                {PLAN_FUNDING_OPTIONS.map((option) => (
+                  <label
+                    key={option.value}
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm transition-colors",
+                      planFunding === option.value
+                        ? "border-primary bg-accent"
+                        : "hover:bg-accent/50",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="planFunding"
+                      value={option.value}
+                      checked={planFunding === option.value}
+                      onChange={() => setPlanFunding(option.value)}
+                      className="accent-primary"
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
         </>
       )}
 
