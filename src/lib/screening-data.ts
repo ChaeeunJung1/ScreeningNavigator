@@ -1,5 +1,16 @@
 export type InsuranceStatus = "uninsured" | "underinsured" | "insured";
 
+/** Which cancer screening tests a state's program actually covers, for selecting test-prep content. */
+export type ScreeningType = "mammogram" | "pap" | "colon";
+
+/**
+ * How confident we are in a program's document requirements:
+ * - "required": documentsRequired is populated, confirmed by an official or secondary source.
+ * - "not-required": confirmed the program does NOT require proof (self-declared income, no income test, etc.) — see documentsNote.
+ * - "unconfirmed": no public source either way. Never guess a checklist for this case — use DOCUMENTS_FALLBACK_UNCONFIRMED.
+ */
+export type DocumentsConfidence = "required" | "not-required" | "unconfirmed";
+
 export const US_STATES = [
   { code: "AL", name: "Alabama" },
   { code: "AK", name: "Alaska" },
@@ -88,7 +99,75 @@ export interface StateProgram {
   ageRangeMax?: number;
   /** Free-text caveat for age edge cases: no max specified, or a confirmed conflict between sources on the minimum age. */
   ageRangeNote?: string;
+  /**
+   * Documents confirmed needed to enroll — only populated when
+   * documentsConfidence is "required". Sourced from the program's own
+   * materials where available, otherwise a secondary source (policy manual,
+   * enrollment form PDF, county page) since no state's own program page
+   * publishes a checklist. See documentsConfidence for how this renders.
+   */
+  documentsRequired?: string[];
+  /**
+   * Confidence in what's needed to enroll. Omitted (undefined) is treated the
+   * same as "unconfirmed" — the UI must never render a guessed checklist for
+   * that case, only DOCUMENTS_FALLBACK_UNCONFIRMED.
+   */
+  documentsConfidence?: DocumentsConfidence;
+  /** Free-text detail for the "not-required" case, e.g. why no proof is needed. */
+  documentsNote?: string;
+  /**
+   * Which tests this program screens for, for selecting test-prep content.
+   * Omitted = defaults to breast + cervical (["mammogram", "pap"]) in the UI
+   * — true for every state except WA (BCCHP), which also covers colon.
+   */
+  screeningTypes?: ScreeningType[];
 }
+
+export interface TestPrepInfo {
+  label: string;
+  bullets: string[];
+}
+
+/**
+ * Clinical test-prep content, keyed by test type — not by state. The
+ * instructions are the same nationwide regardless of which program pays for
+ * the test (ACS/CDC-sourced), so this is written once and reused for every
+ * matched program via StateProgram.screeningTypes.
+ */
+export const TEST_PREP_BY_TYPE: Record<ScreeningType, TestPrepInfo> = {
+  mammogram: {
+    label: "Mammogram",
+    bullets: [
+      "No deodorant, antiperspirant, powder, or lotion on your chest or underarms that day — metallic particles (common in deodorant) can show up as false spots on the image.",
+      "Wear a two-piece outfit — you'll only need to remove your top and bra.",
+      "If you've had a mammogram elsewhere before, ask that facility to send your prior images ahead of the appointment so they can be compared.",
+    ],
+  },
+  pap: {
+    label: "Pap / HPV test",
+    bullets: [
+      "Avoid intercourse, douching, tampons, and vaginal medication for 48 hours before the test.",
+      "Being on your period is fine — the test can still be done, though a lighter day makes for an easier sample if you have flexibility on timing.",
+      "If you did have sex beforehand anyway, go to the appointment as planned and just let the clinician know.",
+    ],
+  },
+  colon: {
+    label: "Colon screening",
+    bullets: [
+      "Most people start with a FIT kit — a mail-in stool test done at home, with no prep required at all.",
+      "A colonoscopy is only needed if the FIT test comes back positive, or if it's ordered directly. That's real prep: a bowel-clearing prep the day before, a clear-liquid diet, and a ride home after (sedation is used) — a bigger ask than the other tests here.",
+    ],
+  },
+};
+
+/**
+ * Shown for a matched program when documentsConfidence is "unconfirmed" (or
+ * omitted). No state's own program page publishes a document checklist, so
+ * this states what's common without asserting it as fact for a program where
+ * it isn't confirmed — never substitute a guessed list here.
+ */
+export const DOCUMENTS_FALLBACK_UNCONFIRMED =
+  "This program didn't publish a document list. ID and proof of income are common for these programs, but not guaranteed — ask what to bring when you call.";
 
 /** Source-verified screening program data for the states currently covered. */
 export const STATE_PROGRAMS: Record<string, StateProgram> = {
@@ -121,6 +200,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // The "BCCS Provider Search" and "/find-doctor" pages were both
     // confirmed empty (title only, no actual widget) as of this check —
     // not a working locator despite the page name.
+    documentsRequired: [
+      "Proof of income (self-declaration accepted if you can't provide it — verification is only mandatory on the Medicaid-treatment track, not screening)",
+    ],
+    documentsConfidence: "required",
   },
   FL: {
     state: "Florida",
@@ -181,6 +264,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMax: 64,
     website:
       "dph.illinois.gov/topics-services/life-stages-populations/womens-health-services/ibccp.html",
+    documentsConfidence: "not-required",
+    documentsNote:
+      "No income test — income doesn't affect eligibility for this program.",
   },
   OH: {
     state: "Ohio",
@@ -225,6 +311,12 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     website: "bcccp.ncdhhs.gov",
     providerFinderUrl:
       "www.dph.ncdhhs.gov/programs/chronic-disease-and-injury/cancer-prevention-and-control-branch/nc-cancer-screening-and-support-programs/find-a-provider",
+    documentsRequired: [
+      "Proof of income",
+      "A completed demographic form (bring it to your appointment)",
+    ],
+    documentsConfidence: "required",
+    documentsNote: "Exact process varies by county.",
   },
   MI: {
     state: "Michigan",
@@ -242,6 +334,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // --OR-- use the dropdown," confirmed live and program-specific.
     providerFinderUrl:
       "www.michigan.gov/mdhhs/keep-mi-healthy/chronicdiseases/cancer/bc3np/bc3np-locations",
+    documentsRequired: [
+      "Income and household information (enrollment form)",
+      "All insurance cards",
+    ],
+    documentsConfidence: "required",
   },
   WA: {
     state: "Washington",
@@ -255,6 +352,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMax: 64,
     website:
       "doh.wa.gov/you-and-your-family/illness-and-disease-z/cancer/breast-cervical-and-colon-health-program",
+    // Only state program in this dataset that also covers colon screening —
+    // drives the extra "colon" test-prep block on the results page.
+    screeningTypes: ["mammogram", "pap", "colon"],
     // General county-by-county Local Health Jurisdiction directory —
     // confirmed real and complete, but WA's own BCCHP model runs through 6
     // regional Prime Contractors, not directly these county LHJs. Weaker
@@ -301,6 +401,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "tn.gov/health/tnbcsp.html",
+    documentsRequired: [
+      "Self-attestation of income is accepted at your first visit — documentation may be requested later for ongoing coverage",
+      "Proof of citizenship or qualified-alien status (confirmed for Nashville/Davidson County's Metro Public Health Department specifically)",
+    ],
+    documentsConfidence: "required",
   },
   IN: {
     state: "Indiana",
@@ -330,6 +435,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "health.mo.gov/conditions-and-diseases/chronic-diseases/show-me-healthy-women",
     // health.mo.gov sits behind a bot wall that blocked verification of the
     // provider map page — not confirmed working, left out.
+    documentsRequired: ["Photo ID", "Proof of income"],
+    documentsConfidence: "required",
   },
   MD: {
     state: "Maryland",
@@ -358,6 +465,12 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // this is WI's real "Local Public Health" county selector, confirmed
     // live, a close match.
     generalHealthDeptFinderUrl: "www.dhs.wisconsin.gov/lh-depts/index.htm",
+    documentsRequired: [
+      "Proof of age",
+      "Proof of income (pay stub, tax statement, or Social Security/unemployment check stub)",
+      "Proof of insurance status",
+    ],
+    documentsConfidence: "required",
   },
   CO: {
     state: "Colorado",
@@ -388,6 +501,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // sage.web.health.state.mn.us for the clinic map, but that subdomain
     // returned a hard 403 Forbidden on repeated checks — not confirmed
     // working, left out.
+    documentsConfidence: "not-required",
+    documentsNote:
+      "No documentation required — income (net income after business expenses for self-employed/farmers) is self-reported.",
   },
   VA: {
     state: "Virginia",
@@ -404,6 +520,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // (zip/address search + radius), confirmed live, last updated 2024.
     generalHealthDeptFinderUrl:
       "www.vdh.virginia.gov/health-department-locator",
+    documentsRequired: ["Proof of income", "Proof of residency"],
+    documentsConfidence: "required",
   },
   NJ: {
     state: "New Jersey",
@@ -425,6 +543,15 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 30,
     ageRangeMax: 64,
     website: "dph.sc.gov/bcn",
+    documentsRequired: [
+      "Photo ID",
+      "Proof of residency",
+      "Proof of income",
+      "Proof of insurance",
+    ],
+    documentsConfidence: "required",
+    documentsNote:
+      "The program's own guidance is to confirm exactly what's needed when you call to schedule — it can vary by provider.",
   },
   KY: {
     state: "Kentucky",
@@ -435,6 +562,12 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 21,
     ageRangeMax: 64,
     website: "chfs.ky.gov/agencies/dph/dwh/Pages/cancerscreening.aspx",
+    documentsRequired: [
+      "Social Security number",
+      "Insurance information, if any",
+      "Proof of citizenship or immigration status (non-citizens)",
+    ],
+    documentsConfidence: "required",
   },
   LA: {
     state: "Louisiana",
@@ -461,6 +594,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // this is AL's real "Locations" map with search, confirmed live.
     generalHealthDeptFinderUrl:
       "www.alabamapublichealth.gov/about/locations.html",
+    documentsConfidence: "not-required",
+    documentsNote:
+      "Proof of income is not required — a signed income declaration/self-attestation is sufficient (per the program's provider manual).",
   },
   OR: {
     state: "Oregon",
@@ -476,6 +612,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // sortable provider table with full addresses.
     providerFinderUrl:
       "www.oregon.gov/oha/ph/healthypeoplefamilies/women/healthscreening/pages/screenwise-patient.aspx",
+    documentsConfidence: "not-required",
+    documentsNote:
+      "Income, insurance status, and location are all self-declared — no proof is required.",
   },
   OK: {
     state: "Oklahoma",
@@ -533,6 +672,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // MSDH's real county health department directory with regional office
     // addresses, confirmed live.
     generalHealthDeptFinderUrl: "msdh.ms.gov/page/19,938,166.html",
+    documentsRequired: ["Proof of income"],
+    documentsConfidence: "required",
   },
   AR: {
     state: "Arkansas",
@@ -546,6 +687,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     website: "arbreastcare.com",
     providerFinderUrl:
       "healthy.arkansas.gov/programs-services/prevention-healthy-living/breastcare-program/breastcare-providers/breastcare-providers-near-you",
+    documentsConfidence: "not-required",
+    documentsNote: "Income is self-declared — no proof of income is required.",
   },
   IA: {
     state: "Iowa",
@@ -557,6 +700,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "hhs.iowa.gov/health-prevention/cancer/cfy",
+    documentsConfidence: "not-required",
+    documentsNote: "Proof of income is not required to enroll.",
   },
   KS: {
     state: "Kansas",
@@ -588,6 +733,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "dhss.delaware.gov/dph/dpc/sfl",
+    documentsRequired: ["Proof of income", "Proof of Delaware residency"],
+    documentsConfidence: "required",
   },
   RI: {
     state: "Rhode Island",
@@ -598,6 +745,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "health.ri.gov/breast-and-cervical-cancer-screening",
+    documentsConfidence: "not-required",
+    documentsNote:
+      "This program doesn't require proof of income or financial status. (If you're referred for a service the program doesn't cover, or move onto the Medicaid pathway, that step may ask for documentation separately.)",
   },
   NH: {
     state: "New Hampshire",
@@ -647,6 +797,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // The NebraskaMap "dataset" page embeds an ArcGIS Experience app
     // (iframe present) but it rendered blank in repeated checks — not
     // confirmed working, left out.
+    documentsRequired: ["Proof of income (may be requested by program staff)"],
+    documentsConfidence: "required",
+    documentsNote:
+      "If you're later found to be over the income limit, you may be billed retroactively for services already received.",
   },
   UT: {
     state: "Utah",
@@ -705,6 +859,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // that page, confirmed to load real provider pins.
     providerFinderUrl:
       "www.google.com/maps/d/u/2/viewer?mid=1oW_AzMrNUCkTPcwyz0_HJjjvsZgh1WY&femb=1&ll=44.71985644486366%2C-100.61335036997528&z=7",
+    documentsConfidence: "not-required",
+    documentsNote: "Income is self-reported — no documentation is required.",
   },
   VT: {
     state: "Vermont",
@@ -755,6 +911,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // map, confirmed live, a proxy rather than a Ladies First-specific list.
     generalHealthDeptFinderUrl:
       "health.alaska.gov/en/services/find-public-health-center",
+    documentsConfidence: "not-required",
+    documentsNote:
+      "The federally-funded (NBCCEDP) track of this program doesn't require proof of income — a separate funding stream on the same program does, so ask which applies to you.",
   },
 };
 

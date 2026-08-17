@@ -210,8 +210,10 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
                     program
                       ? `Contact ${program.programName}`
                       : "Find a local clinic or navigator",
-                    "Prepare income and household details",
-                    "Ask about screening and follow-up coverage",
+                    program
+                      ? 'Ask: "Am I eligible?" and "What do I need to bring?"'
+                      : "Ask about screening and follow-up coverage",
+                    "Add your appointment to your calendar as soon as it's set",
                     "Use backup assistance if you don't qualify",
                   ]
               ).map((step, i) => (
@@ -224,40 +226,18 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
               ))}
             </ol>
 
-            {!isInsured && program?.providerFinderUrl && (
+            {!isInsured && program && (
               <Button asChild>
-                <a
-                  href={`https://${program.providerFinderUrl}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Find a clinic near you
-                </a>
+                <Link href="/results/next-steps">
+                  See your full action plan
+                </Link>
               </Button>
             )}
-            {!isInsured &&
-              !program?.providerFinderUrl &&
-              program?.generalHealthDeptFinderUrl && (
-                <Button variant="secondary" asChild>
-                  <a
-                    href={`https://${program.generalHealthDeptFinderUrl}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Find your local health department
-                  </a>
-                </Button>
-              )}
+
+            {/* Clinic locator buttons live on the "Find nearest clinic" card
+                in the main column — not duplicated here. */}
             {!isInsured && program?.website && (
-              <Button
-                variant={
-                  program?.providerFinderUrl ||
-                  program?.generalHealthDeptFinderUrl
-                    ? "outline"
-                    : "default"
-                }
-                asChild
-              >
+              <Button variant="outline" asChild>
                 <a
                   href={`https://${program.website}`}
                   target="_blank"
