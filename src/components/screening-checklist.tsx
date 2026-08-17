@@ -7,6 +7,8 @@ import {
 } from "~/components/ui/card";
 import {
   DOCUMENTS_FALLBACK_UNCONFIRMED,
+  DOCUMENTS_GENERAL_ID_NOTE,
+  DOCUMENTS_GENERAL_READY_FACTS,
   type STATE_PROGRAMS,
   TEST_PREP_BY_TYPE,
 } from "~/lib/screening-data";
@@ -41,7 +43,22 @@ export function WhatToBring({
               "This program doesn't require proof of income or ID."}
           </CardDescription>
         ) : (
-          <CardDescription>{DOCUMENTS_FALLBACK_UNCONFIRMED}</CardDescription>
+          <>
+            <CardDescription>{DOCUMENTS_FALLBACK_UNCONFIRMED}</CardDescription>
+            <div>
+              <p className="text-sm font-medium">
+                Have these ready when you call:
+              </p>
+              <ul className="flex flex-col gap-1 pl-4 text-sm text-muted-foreground list-disc">
+                {DOCUMENTS_GENERAL_READY_FACTS.map((fact) => (
+                  <li key={fact}>{fact}</li>
+                ))}
+              </ul>
+            </div>
+            <CardDescription className="text-xs">
+              {DOCUMENTS_GENERAL_ID_NOTE}
+            </CardDescription>
+          </>
         )}
         {program.documentsConfidence === "required" &&
           program.documentsNote && (
