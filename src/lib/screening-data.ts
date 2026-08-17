@@ -121,6 +121,21 @@ export interface StateProgram {
    * — true for every state except WA (BCCHP), which also covers colon.
    */
   screeningTypes?: ScreeningType[];
+  /**
+   * The state's Dept. of Insurance (or equivalent regulator) consumer
+   * complaint page — for insured women whose insurer won't fix a
+   * wrongly-coded preventive-care bill. This is a regulator lookup, not a
+   * screening-program field, so it applies to every state regardless of
+   * whether a screening program above is populated.
+   *
+   * Only set where a live page was confirmed — either fetched directly, or
+   * (many state DOI sites block automated fetches) corroborated by matching
+   * detail — official domain, correct phone number/address — across
+   * multiple independent search results. See per-state comments for which.
+   * Falls back to NATIONAL_INSURANCE_COMPLAINT_FALLBACK when unset — never
+   * guess a state-specific URL here.
+   */
+  insuranceComplaintUrl?: string;
 }
 
 export interface TestPrepInfo {
@@ -170,6 +185,15 @@ export const DOCUMENTS_FALLBACK_UNCONFIRMED =
   "This program didn't publish a document list. ID and proof of income are common for these programs, but not guaranteed — ask what to bring when you call.";
 
 /**
+ * Shown for the insured path when the selected state doesn't yet have a
+ * confirmed insuranceComplaintUrl. NAIC's own locator (confirmed live,
+ * covers all 50 states + DC via a dropdown) is a safe universal fallback —
+ * never substitute a guessed state DOI URL here.
+ */
+export const NATIONAL_INSURANCE_COMPLAINT_FALLBACK =
+  "https://content.naic.org/state-insurance-departments";
+
+/**
  * Facts every program needs to determine eligibility, whether or not it
  * formally requires proof — true regardless of documentsConfidence, since
  * even the self-declared programs still ask for these on the enrollment
@@ -208,6 +232,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     website: "dhcs.ca.gov/services/every-woman-counts",
     // apps.dhcs.ca.gov/PCPSearch was found via search but sits behind a bot
     // wall that blocked verification — not confirmed working, left out.
+    // CDI's own "File a Complaint" hub — confirmed live via direct fetch.
+    insuranceComplaintUrl: "www.insurance.ca.gov/01-consumers/101-help/",
   },
   TX: {
     state: "Texas",
@@ -247,6 +273,8 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // counties, confirmed live.
     generalHealthDeptFinderUrl:
       "www.floridahealth.gov/community-environmental-public-health/community-health/county-health-departments/county-health-department-location-finder",
+    // Florida DFS's consumer complaint intake — confirmed live via direct fetch.
+    insuranceComplaintUrl: "myfloridacfo.com/division/consumers/needourhelp",
   },
   PA: {
     state: "Pennsylvania",
@@ -341,6 +369,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ],
     documentsConfidence: "required",
     documentsNote: "Exact process varies by county.",
+    // NC DOI's "Assistance or File a Complaint" page — confirmed live via
+    // direct fetch.
+    insuranceComplaintUrl:
+      "www.ncdoi.gov/contactscomplaints/assistance-or-file-complaint",
   },
   MI: {
     state: "Michigan",
@@ -363,6 +395,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "All insurance cards",
     ],
     documentsConfidence: "required",
+    // Michigan DIFS's "Filing a Complaint" page — michigan.gov blocks
+    // automated fetches (direct fetch returned 403, matching this dataset's
+    // existing MO precedent), but the URL and 877-999-6442 phone number are
+    // corroborated across multiple independent search results.
+    insuranceComplaintUrl: "www.michigan.gov/difs/consumers/complaint",
   },
   WA: {
     state: "Washington",
@@ -385,6 +422,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // match than most Tier-2 states — flag if this needs re-review.
     generalHealthDeptFinderUrl:
       "doh.wa.gov/about-us/washingtons-public-health-system/washington-state-local-health-jurisdictions",
+    // WA OIC's general complaints page — confirmed live via direct fetch.
+    insuranceComplaintUrl:
+      "www.insurance.wa.gov/complaints-appeals-fraud/complaints",
   },
   AZ: {
     state: "Arizona",
@@ -461,6 +501,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // provider map page — not confirmed working, left out.
     documentsRequired: ["Photo ID", "Proof of income"],
     documentsConfidence: "required",
+    // Missouri DOI's "What to Do if You Have a Complaint" page —
+    // insurance.mo.gov also sits behind a bot wall (direct fetch returned
+    // 403), but the URL, process, and 800-726-7390 hotline are corroborated
+    // across multiple independent search results.
+    insuranceComplaintUrl: "insurance.mo.gov/what-do-if-you-have-complaint",
   },
   MD: {
     state: "Maryland",
@@ -473,6 +518,12 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMin: 40,
     ageRangeMax: 64,
     website: "health.maryland.gov/phpa/cancer/pages/bccp_home.aspx",
+    // Maryland Insurance Administration's "File A Complaint" page —
+    // insurance.maryland.gov blocks automated fetches (direct fetch
+    // returned 403), but the URL and process (1-800-492-6116) are
+    // corroborated across multiple independent search results.
+    insuranceComplaintUrl:
+      "insurance.maryland.gov/Consumer/pages/fileacomplaint.aspx",
   },
   WI: {
     state: "Wisconsin",
@@ -495,6 +546,12 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "Proof of insurance status",
     ],
     documentsConfidence: "required",
+    // Wisconsin OCI's "Filing an Insurance Complaint" page, from a search
+    // result title exactly matching this page — a plausible near-neighbor
+    // URL 404'd on direct fetch, and this exact URL wasn't independently
+    // re-fetched, so treat as lower-confidence than the fetch-confirmed
+    // entries above.
+    insuranceComplaintUrl: "oci.wi.gov/Pages/Consumers/Filing-a-Complaint.aspx",
   },
   CO: {
     state: "Colorado",
@@ -510,6 +567,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     // The entire cdphe.colorado.gov domain returned a hard error on every
     // URL tried (including the newer /wwc-wisewoman/cliniclocation/map) —
     // not confirmed working, left out.
+    // Colorado DOI's "File a Complaint" page (a different domain,
+    // doi.colorado.gov, than the broken cdphe.colorado.gov above) — direct
+    // fetch was blocked (403), but the URL and title match the top search
+    // result exactly ("File a Complaint | DORA - Division of Insurance").
+    insuranceComplaintUrl: "doi.colorado.gov/for-consumers/file-a-complaint",
   },
   MN: {
     state: "Minnesota",
@@ -592,6 +654,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "Proof of citizenship or immigration status (non-citizens)",
     ],
     documentsConfidence: "required",
+    // Kentucky DOI's complaint form, linked from the department homepage
+    // ("File a Complaint" under "How Do I?") — confirmed via a successful
+    // fetch of the homepage itself.
+    insuranceComplaintUrl: "insurance.ky.gov/ppc/forms/complaints_home.aspx",
   },
   LA: {
     state: "Louisiana",
@@ -603,6 +669,11 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     ageRangeMax: 64,
     website: "lbchp.org",
     providerFinderUrl: "lbchp.org/locations",
+    // Louisiana DOI's "Consumer Complaint Form" — direct fetch was blocked
+    // (403), but the URL and title match the top search result exactly
+    // ("Louisiana Department of Insurance - Consumer Complaint Form").
+    insuranceComplaintUrl:
+      "www.ldi.la.gov/onlineservices/ConsumerComplaintForm",
   },
   AL: {
     state: "Alabama",
@@ -698,6 +769,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     generalHealthDeptFinderUrl: "msdh.ms.gov/page/19,938,166.html",
     documentsRequired: ["Proof of income"],
     documentsConfidence: "required",
+    // Mississippi Insurance Dept's "File a Complaint" page — confirmed live
+    // via direct fetch.
+    insuranceComplaintUrl:
+      "www.mid.ms.gov/mississippi-insurance-department/consumers/file-a-complaint/",
   },
   AR: {
     state: "Arkansas",
@@ -713,6 +788,10 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
       "healthy.arkansas.gov/programs-services/prevention-healthy-living/breastcare-program/breastcare-providers/breastcare-providers-near-you",
     documentsConfidence: "not-required",
     documentsNote: "Income is self-declared — no proof of income is required.",
+    // Arkansas Insurance Dept's "File A Complaint" page — confirmed live via
+    // direct fetch.
+    insuranceComplaintUrl:
+      "insurance.arkansas.gov/consumer-assistance/consumer-services/file-a-complaint/",
   },
   IA: {
     state: "Iowa",
@@ -759,6 +838,9 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     website: "dhss.delaware.gov/dph/dpc/sfl",
     documentsRequired: ["Proof of income", "Proof of Delaware residency"],
     documentsConfidence: "required",
+    // Delaware DOI's "File a Complaint/Appeal" page — confirmed live via
+    // direct fetch.
+    insuranceComplaintUrl: "insurance.delaware.gov/services/filecomplaint/",
   },
   RI: {
     state: "Rhode Island",
@@ -772,6 +854,12 @@ export const STATE_PROGRAMS: Record<string, StateProgram> = {
     documentsConfidence: "not-required",
     documentsNote:
       "This program doesn't require proof of income or financial status. (If you're referred for a service the program doesn't cover, or move onto the Medicaid pathway, that step may ask for documentation separately.)",
+    // RI's Office of the Health Insurance Commissioner — health-insurance-
+    // specific (not the general Insurance Division), a better fit than most
+    // other states' general DOI page. Direct fetch was blocked (403), but
+    // the URL and title match the top search result exactly ("Health
+    // Insurance Complaints | Office of The Health Insurance Commissioner").
+    insuranceComplaintUrl: "ohic.ri.gov/consumer-protection/file-complaint",
   },
   NH: {
     state: "New Hampshire",
