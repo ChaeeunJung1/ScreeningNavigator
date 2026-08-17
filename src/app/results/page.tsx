@@ -21,6 +21,7 @@ import {
   getFplPercent,
   INSURED_COST_HELP,
   MEDICAID_TREATMENT_PATHWAY_NOTE,
+  NATIONAL_INSURANCE_COMPLAINT_FALLBACK,
   STATE_PROGRAMS,
   US_STATES,
 } from "~/lib/screening-data";
@@ -73,6 +74,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const householdSize = Number(params.householdSize);
   const income = Number(params.income);
   const hasRegularDoctor = params.hasRegularDoctor === "yes";
+  const costWorry = params.costWorry === "yes";
 
   const stateName =
     US_STATES.find((s) => s.code === stateCode)?.name ?? stateCode;
@@ -139,7 +141,12 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         </div>
 
         {isInsured ? (
-          <InsuredOutcome hasRegularDoctor={hasRegularDoctor} />
+          <InsuredOutcome
+            hasRegularDoctor={hasRegularDoctor}
+            costWorry={costWorry}
+            stateName={stateName}
+            insuranceComplaintUrl={program?.insuranceComplaintUrl}
+          />
         ) : (
           <UninsuredOutcome
             stateName={stateName}
@@ -587,7 +594,87 @@ function MedicaidGuidance({
   );
 }
 
-function InsuredOutcome({ hasRegularDoctor }: { hasRegularDoctor: boolean }) {
+function InsuredOutcome({
+  hasRegularDoctor,
+  costWorry,
+  stateName,
+  insuranceComplaintUrl,
+}: {
+  hasRegularDoctor: boolean;
+  costWorry: boolean;
+  stateName: string;
+  insuranceComplaintUrl: string | undefined;
+}) {
+  const bookingCard = (
+    <Card key="booking">
+      <CardHeader>
+        <CardTitle>What to say when booking</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>
+          Ask for a <span className="font-medium">"routine screening"</span>{" "}
+          mammogram, not just the exam name. That's the phrase that gets your
+          visit coded as preventive care instead of diagnostic.
+        </CardDescription>
+      </CardContent>
+    </Card>
+  );
+
+  const costSharingCard = (
+    <Card key="cost-sharing">
+      <CardHeader>
+        <CardTitle>Your ACA right: $0 cost-sharing</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>
+          In-network preventive screening should cost you $0 — no copay, no
+          deductible. This is a legal right under the Affordable Care Act, not
+          something you need to verify by calling.
+        </CardDescription>
+      </CardContent>
+    </Card>
+  );
+
+  const billingTrapCard = (
+    <Card key="billing-trap">
+      <CardHeader>
+        <CardTitle>The billing trap to avoid</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-2">
+        <CardDescription>
+          Coverage on paper doesn't always mean a correctly billed visit. If
+          your screening gets coded as "diagnostic" instead of "preventive," you
+          may be billed even though you shouldn't be. If that happens, call your
+          insurer, reference your ACA preventive care right, and ask for the
+          claim to be recoded and reprocessed.
+        </CardDescription>
+        <p className="text-sm">
+          If your insurer won't fix it, escalate to{" "}
+          {insuranceComplaintUrl ? (
+            <a
+              href={`https://${insuranceComplaintUrl}`}
+              target="_blank"
+              rel="noreferrer"
+              className="underline hover:text-foreground"
+            >
+              {stateName}'s insurance regulator
+            </a>
+          ) : (
+            <a
+              href={NATIONAL_INSURANCE_COMPLAINT_FALLBACK}
+              target="_blank"
+              rel="noreferrer"
+              className="underline hover:text-foreground"
+            >
+              your state's insurance regulator (NAIC locator)
+            </a>
+          )}{" "}
+          and file a consumer complaint.
+        </p>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="flex flex-col gap-4">
       {!hasRegularDoctor && (
@@ -606,46 +693,24 @@ function InsuredOutcome({ hasRegularDoctor }: { hasRegularDoctor: boolean }) {
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>What to say when booking</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CardDescription>
-            Ask for a <span className="font-medium">"routine screening"</span>{" "}
-            mammogram, not just the exam name. That's the phrase that gets your
-            visit coded as preventive care instead of diagnostic.
-          </CardDescription>
-        </CardContent>
-      </Card>
+      {costWorry && (
+        <Card className="border-primary/50 bg-primary/5">
+          <CardHeader>
+            <CardTitle>About your cost concern</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CardDescription>
+              You told us you're worried about the cost of screening. Being
+              insured doesn't always mean $0 in practice — two things below
+              apply directly to that concern, so we've put them first.
+            </CardDescription>
+          </CardContent>
+        </Card>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Your ACA right: $0 cost-sharing</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CardDescription>
-            In-network preventive screening should cost you $0 — no copay, no
-            deductible. This is a legal right under the Affordable Care Act, not
-            something you need to verify by calling.
-          </CardDescription>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>The billing trap to avoid</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CardDescription>
-            Coverage on paper doesn't always mean a correctly billed visit. If
-            your screening gets coded as "diagnostic" instead of "preventive,"
-            you may be billed even though you shouldn't be. If that happens,
-            call your insurer, reference your ACA preventive care right, and ask
-            for the claim to be recoded and reprocessed.
-          </CardDescription>
-        </CardContent>
-      </Card>
+      {costWorry
+        ? [costSharingCard, billingTrapCard, bookingCard]
+        : [bookingCard, costSharingCard, billingTrapCard]}
 
       <Card id="get-screened-now">
         <CardHeader>
