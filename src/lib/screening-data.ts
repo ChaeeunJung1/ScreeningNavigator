@@ -193,6 +193,142 @@ export const DOCUMENTS_FALLBACK_UNCONFIRMED =
 export const NATIONAL_INSURANCE_COMPLAINT_FALLBACK =
   "https://content.naic.org/state-insurance-departments";
 
+/** What kind of health plan an insured user has — determines who actually has jurisdiction over a billing dispute. */
+export type InsurancePlanType =
+  | "employer"
+  | "marketplace"
+  | "medicare_advantage"
+  | "not_sure";
+
+/**
+ * Only meaningful when planType is "employer". Self-funded (a.k.a.
+ * "self-insured") employer plans are federal ERISA plans regulated by the
+ * U.S. Department of Labor — a state Dept. of Insurance has no jurisdiction
+ * over them, even though the plan may be administered by a familiar
+ * insurance-company brand. Fully-insured employer plans are state-regulated,
+ * same as a marketplace plan. Most employees don't know which theirs is —
+ * "not_sure" is a real, expected answer, not a data-entry gap.
+ */
+export type EmployerPlanFunding = "self_funded" | "fully_insured" | "not_sure";
+
+/**
+ * Who actually has jurisdiction over a billing dispute, resolved from
+ * planType/planFunding. "unclear" covers every case where we can't tell
+ * (planType "not_sure", or "employer" with funding "not_sure"/unset, or no
+ * plan-type answer at all — e.g. a result saved before this question
+ * existed) — DISPUTE_SCRIPTS["unclear"] must never guess a specific
+ * regulator for that case.
+ */
+export type EscalationPath = "state_doi" | "dol_ebsa" | "medicare" | "unclear";
+
+/**
+ * Resolves which regulator/complaint body actually has jurisdiction.
+ * Sourced this session:
+ * - Self-funded employer (ERISA) plans → DOL-EBSA, not the state DOI, confirmed via
+ *   dol.gov/agencies/ebsa/about-ebsa/our-activities/enforcement/erisa and
+ *   insurance.ca.gov's own complaint-process guide, which states plainly that
+ *   state DOI does not regulate self-insured plans even when a familiar
+ *   insurer administers them.
+ * - Medicare Advantage → the plan's own grievance process first, then
+ *   1-800-MEDICARE — not the state DOI at all (cms.gov/medicare/appeals-grievances/managed-care).
+ * - Marketplace and fully-insured employer plans → the state DOI is the
+ *   right regulator (cms.gov/marketplace/about/affordable-care-act/external-appeals).
+ */
+export function getEscalationPath(
+  planType: InsurancePlanType | null | undefined,
+  planFunding: EmployerPlanFunding | null | undefined,
+): EscalationPath {
+  if (planType === "medicare_advantage") return "medicare";
+  if (planType === "employer") {
+    if (planFunding === "self_funded") return "dol_ebsa";
+    if (planFunding === "fully_insured") return "state_doi";
+    return "unclear";
+  }
+  if (planType === "marketplace") return "state_doi";
+  return "unclear"; // planType "not_sure", or unset (pre-dates this question)
+}
+
+/** Fixed federal contact for ERISA self-funded plan disputes — same for every state and user. */
+export const DOL_EBSA_CONTACT = {
+  name: "U.S. Department of Labor – Employee Benefits Security Administration (EBSA)",
+  phone: "1-866-275-7922",
+  url: "www.dol.gov/agencies/ebsa",
+};
+
+/** Fixed federal contact for Medicare Advantage complaints, used only after the plan's own grievance process. */
+export const MEDICARE_COMPLAINT_CONTACT = {
+  name: "Medicare",
+  phone: "1-800-633-4227 (1-800-MEDICARE)",
+  url: "www.medicare.gov/basics/get-started-with-medicare/coverage/how-to-file-a-complaint",
+};
+
+export interface DisputeScript {
+  /** One line explaining why this path applies — shown so the escalation target doesn't look arbitrary. */
+  whyThisPath: string;
+  /** Numbered steps for the first call, before any escalation. */
+  scriptSteps: string[];
+  /** What to get in writing before hanging up — needed as evidence if escalation becomes necessary. */
+  writtenRequestNote: string;
+}
+
+/**
+ * The full dispute script, keyed by the resolved EscalationPath. The first
+ * three steps (call, cite the ACA right, get a reference number) are the
+ * same regardless of path — only the "why" framing and the final escalation
+ * target differ, which is exactly the distinction the plan-type question
+ * exists to capture.
+ */
+export const DISPUTE_SCRIPTS: Record<EscalationPath, DisputeScript> = {
+  state_doi: {
+    whyThisPath:
+      "Your plan is regulated by your state's Department of Insurance, which can investigate and order your insurer to fix a wrongly-billed claim.",
+    scriptSteps: [
+      'Call the member services number on your insurance card and say: "I\'m disputing a claim — my visit was billed as diagnostic, but it should be covered as a preventive screening at $0 cost-sharing under the ACA."',
+      "Give the claim number and date of service so they can pull it up.",
+      "Ask them to recode the claim as preventive and reprocess it.",
+      "Ask for a case or reference number for this call before you hang up.",
+    ],
+    writtenRequestNote:
+      "Ask for the outcome in writing — a denial letter or an email confirming the recode — you'll need it if you have to escalate.",
+  },
+  dol_ebsa: {
+    whyThisPath:
+      "Self-funded employer plans are federal ERISA plans — your state's Dept. of Insurance has no authority here, even if a familiar insurance company administers the plan day to day.",
+    scriptSteps: [
+      'Call the member services number on your insurance card and say: "I\'m disputing a claim — my visit was billed as diagnostic, but it should be covered as a preventive screening at $0 cost-sharing under the ACA."',
+      "Give the claim number and date of service so they can pull it up.",
+      "Ask them to recode the claim as preventive and reprocess it.",
+      "Ask for a case or reference number for this call before you hang up.",
+    ],
+    writtenRequestNote:
+      "Ask for the outcome in writing — a denial letter or an email confirming the recode — you'll need it if you have to escalate to EBSA.",
+  },
+  medicare: {
+    whyThisPath:
+      "Medicare Advantage complaints go through the plan's own grievance process first, then Medicare directly — your state's Dept. of Insurance doesn't have jurisdiction over Medicare Advantage plans.",
+    scriptSteps: [
+      'Call the member services number on your Medicare Advantage card and say: "I\'m filing a grievance — my visit was billed as diagnostic, but it should be covered as a preventive screening at $0 cost-sharing."',
+      "Give the claim number and date of service so they can pull it up.",
+      "Ask for the grievance to be logged and for a written response — plans must respond within 30 days (24 hours if urgent).",
+      "Note the date you filed — you have 60 days from the billing issue to file the grievance at all.",
+    ],
+    writtenRequestNote:
+      "If the plan doesn't resolve it or misses its deadline, call 1-800-MEDICARE to file a complaint directly with Medicare — have your case/reference number ready.",
+  },
+  unclear: {
+    whyThisPath:
+      "Who has jurisdiction depends on whether your plan is state-regulated (marketplace, or a fully-insured employer plan) or a federal ERISA plan (a self-funded employer plan) or Medicare Advantage — each escalates differently, so it's worth finding out which applies to you.",
+    scriptSteps: [
+      'Call the member services number on your insurance card and say: "I\'m disputing a claim — my visit was billed as diagnostic, but it should be covered as a preventive screening at $0 cost-sharing under the ACA."',
+      "Give the claim number and date of service so they can pull it up.",
+      "Ask them to recode the claim as preventive and reprocess it.",
+      'While you\'re on the call, also ask: "Is my plan self-funded by my employer, or fully insured?" — member services can usually tell you, or check your Summary Plan Description (ask HR).',
+    ],
+    writtenRequestNote:
+      "Ask for the outcome in writing — a denial letter or an email confirming the recode — and once you know your plan type, use it to find the right escalation contact.",
+  },
+};
+
 /**
  * Facts every program needs to determine eligibility, whether or not it
  * formally requires proof — true regardless of documentsConfidence, since

@@ -17,10 +17,16 @@ import {
 } from "~/components/ui/card";
 import {
   COST_HELP_LATER,
+  DISPUTE_SCRIPTS,
+  DOL_EBSA_CONTACT,
+  type EmployerPlanFunding,
   FINANCIAL_ASSISTANCE,
+  getEscalationPath,
   getFplPercent,
   INSURED_COST_HELP,
+  type InsurancePlanType,
   MEDICAID_TREATMENT_PATHWAY_NOTE,
+  MEDICARE_COMPLAINT_CONTACT,
   NATIONAL_INSURANCE_COMPLAINT_FALLBACK,
   STATE_PROGRAMS,
   US_STATES,
@@ -52,13 +58,20 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   // sidebar) never overwrites previously saved answers with blanks.
   const hasFreshAnswers = Boolean(stateCode && insurance);
 
+  // Plan type/funding, restored from the saved result on a plain revisit
+  // (e.g. from the sidebar) the same way stateCode/insurance are below.
+  // Overwritten with fresh URL values further down when this visit does
+  // carry a new questionnaire submission.
+  let planType: InsurancePlanType | undefined;
+  let planFunding: EmployerPlanFunding | undefined;
+
   if (!hasFreshAnswers) {
     // No questionnaire answers in the URL (e.g. navigating here straight
     // from the sidebar) — fall back to the user's last saved result
     // instead of always bouncing to the questionnaire.
     const { data: savedResult } = await supabase
       .from("screening_results")
-      .select("state_code, insurance_status")
+      .select("state_code, insurance_status, plan_type, plan_funding")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -68,6 +81,9 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 
     stateCode = savedResult.state_code;
     insurance = savedResult.insurance_status;
+    planType = (savedResult.plan_type as InsurancePlanType | null) ?? undefined;
+    planFunding =
+      (savedResult.plan_funding as EmployerPlanFunding | null) ?? undefined;
   }
 
   const age = Number(params.age);
@@ -75,6 +91,12 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const income = Number(params.income);
   const hasRegularDoctor = params.hasRegularDoctor === "yes";
   const costWorry = params.costWorry === "yes";
+  if (typeof params.planType === "string") {
+    planType = params.planType as InsurancePlanType;
+  }
+  if (typeof params.planFunding === "string") {
+    planFunding = params.planFunding as EmployerPlanFunding;
+  }
 
   const stateName =
     US_STATES.find((s) => s.code === stateCode)?.name ?? stateCode;
@@ -110,6 +132,9 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
           age: validAge,
           household_size: Number.isFinite(householdSize) ? householdSize : null,
           income: Number.isFinite(income) ? income : null,
+          plan_type: isInsured ? (planType ?? null) : null,
+          plan_funding:
+            isInsured && planType === "employer" ? (planFunding ?? null) : null,
         },
         { onConflict: "user_id" },
       );
@@ -146,6 +171,8 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
             costWorry={costWorry}
             stateName={stateName}
             insuranceComplaintUrl={program?.insuranceComplaintUrl}
+            planType={planType}
+            planFunding={planFunding}
           />
         ) : (
           <UninsuredOutcome
@@ -237,6 +264,14 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
               <Button asChild>
                 <Link href="/results/next-steps">
                   See your full action plan
+                </Link>
+              </Button>
+            )}
+
+            {isInsured && (
+              <Button asChild>
+                <Link href="/results/insured-rights">
+                  Get your printable rights summary
                 </Link>
               </Button>
             )}
@@ -599,12 +634,18 @@ function InsuredOutcome({
   costWorry,
   stateName,
   insuranceComplaintUrl,
+  planType,
+  planFunding,
 }: {
   hasRegularDoctor: boolean;
   costWorry: boolean;
   stateName: string;
   insuranceComplaintUrl: string | undefined;
+  planType: InsurancePlanType | undefined;
+  planFunding: EmployerPlanFunding | undefined;
 }) {
+  const escalationPath = getEscalationPath(planType, planFunding);
+  const disputeScript = DISPUTE_SCRIPTS[escalationPath];
   const bookingCard = (
     <Card key="booking">
       <CardHeader>
@@ -640,37 +681,70 @@ function InsuredOutcome({
       <CardHeader>
         <CardTitle>The billing trap to avoid</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
+      <CardContent className="flex flex-col gap-3">
         <CardDescription>
           Coverage on paper doesn't always mean a correctly billed visit. If
           your screening gets coded as "diagnostic" instead of "preventive," you
-          may be billed even though you shouldn't be. If that happens, call your
-          insurer, reference your ACA preventive care right, and ask for the
-          claim to be recoded and reprocessed.
+          may be billed even though you shouldn't be.{" "}
+          {disputeScript.whyThisPath}
         </CardDescription>
-        <p className="text-sm">
-          If your insurer won't fix it, escalate to{" "}
-          {insuranceComplaintUrl ? (
-            <a
-              href={`https://${insuranceComplaintUrl}`}
-              target="_blank"
-              rel="noreferrer"
-              className="underline hover:text-foreground"
-            >
-              {stateName}'s insurance regulator
-            </a>
-          ) : (
-            <a
-              href={NATIONAL_INSURANCE_COMPLAINT_FALLBACK}
-              target="_blank"
-              rel="noreferrer"
-              className="underline hover:text-foreground"
-            >
-              your state's insurance regulator (NAIC locator)
-            </a>
-          )}{" "}
-          and file a consumer complaint.
+        <ol className="flex flex-col gap-1.5 text-sm">
+          {disputeScript.scriptSteps.map((step, i) => (
+            <li key={step} className="flex gap-2">
+              <span className="shrink-0 font-medium text-muted-foreground">
+                {i + 1}.
+              </span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
+        <p className="text-sm text-muted-foreground">
+          {disputeScript.writtenRequestNote}
         </p>
+        {escalationPath !== "unclear" && (
+          <p className="text-sm">
+            If it's still not fixed, escalate to{" "}
+            {escalationPath === "dol_ebsa" ? (
+              <a
+                href={`https://${DOL_EBSA_CONTACT.url}`}
+                target="_blank"
+                rel="noreferrer"
+                className="underline hover:text-foreground"
+              >
+                {DOL_EBSA_CONTACT.name} ({DOL_EBSA_CONTACT.phone})
+              </a>
+            ) : escalationPath === "medicare" ? (
+              <a
+                href={`https://${MEDICARE_COMPLAINT_CONTACT.url}`}
+                target="_blank"
+                rel="noreferrer"
+                className="underline hover:text-foreground"
+              >
+                {MEDICARE_COMPLAINT_CONTACT.name} (
+                {MEDICARE_COMPLAINT_CONTACT.phone})
+              </a>
+            ) : insuranceComplaintUrl ? (
+              <a
+                href={`https://${insuranceComplaintUrl}`}
+                target="_blank"
+                rel="noreferrer"
+                className="underline hover:text-foreground"
+              >
+                {stateName}'s insurance regulator
+              </a>
+            ) : (
+              <a
+                href={NATIONAL_INSURANCE_COMPLAINT_FALLBACK}
+                target="_blank"
+                rel="noreferrer"
+                className="underline hover:text-foreground"
+              >
+                your state's insurance regulator (NAIC locator)
+              </a>
+            )}{" "}
+            and file a consumer complaint.
+          </p>
+        )}
       </CardContent>
     </Card>
   );
